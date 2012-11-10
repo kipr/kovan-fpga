@@ -144,27 +144,6 @@ module kovan (
 	      // LED
 	      output wire       FPGA_LED,
 
-`ifdef HAS_DDR   
-	      // mcb interface to DDR2
-	      inout  [C3_NUM_DQ_PINS-1:0]          mcb3_dram_dq,
-	      output [C3_MEM_ADDR_WIDTH-1:0]       mcb3_dram_a,
-	      output [C3_MEM_BANKADDR_WIDTH-1:0]   mcb3_dram_ba,
-	      output                               mcb3_dram_ras_n,
-	      output                               mcb3_dram_cas_n,
-	      output                               mcb3_dram_we_n,
-	      output                               mcb3_dram_odt,
-	      output                               mcb3_dram_cke,
-	      output                               mcb3_dram_dm,
-	      inout                                mcb3_dram_udqs,
-	      inout                                mcb3_dram_udqs_n,
-	      inout                                mcb3_rzq,
-	      inout                                mcb3_zio,
-	      output                               mcb3_dram_udm,
-	      inout                                mcb3_dram_dqs,
-	      inout                                mcb3_dram_dqs_n,
-	      output                               mcb3_dram_ck,
-	      output                               mcb3_dram_ck_n,
-`endif //  `ifdef HAS_DDR
 	      
 	      input wire       OSC_CLK   // 26 mhz clock from CPU
 	      );
@@ -345,304 +324,6 @@ module kovan (
 	     .DIG_CLR_N(DIG_CLR_N)
 		     );
    
-
-`ifdef HAS_DDR   
-   ///////////////////////////////////////////
-   /////// DDR2 core 128 MB x 16 of memory, 312 MHz (624 Mt/s = 1.2 GiB/s)
-   // generate a 312 MHz clock from the 26 MHz local buffer
-   wire c3_sys_clk;
-   wire c3_clk_locked;
-   wire c3_clk_fb_from_clkgen;
-   wire c3_clk_fb_to_clkgen;
-   clk_ddr2_26m_312m ddr2_clk(
-			      .CLK_IN1(clk26buf),
-			      .CLKFB_IN(c3_clk_fb_to_clkgen),
-			      .CLK_OUT1(c3_sys_clk),
-			      .CLKFB_OUT(c3_clk_fb_from_clkgen),
-			      .RESET(glbl_reset),
-			      .LOCKED(c3_clk_locked)
-			      );
-   BUFG ddr2_clkf_buf
-     (.O (c3_clk_fb_to_clkgen),
-      .I (c3_clk_fb_from_clkgen));
-
-   // instantiate the core
-   wire c3_clk0; // clock to internal fabric
-   wire c3_rst0;
-   reg [31:0] ddr2_read_data;
-   wire [31:0] ddr2_read_data_c3;
-   reg [31:0]  ddr2_read_data_c3_save;
-   wire [31:0] ddr2_write_data;
-   reg [31:0] ddr2_write_data_c3;
-   wire [29:0]  ddr2_test_addr;
-   reg [29:0]  ddr2_test_addr_c3;
-
-   // local control logic
-   reg 	       ddr2_wren;
-   reg 	       ddr2_rden;
-   reg 	       ddr2_rden_d;
-   reg 	       ddr2_wr_cmd_en;
-   reg 	       ddr2_rd_cmd_en;
-   wire        ddr2_rd_avail_n;
-   wire        ddr2_wr_empty;
-   wire        ddr2_reset;
-
-   // register interface controls
-   wire        ddr2_dowrite;
-   wire        ddr2_doread;
-   wire [7:0]  ddr2_regcmd;
-   reg [7:0]   ddr2_regcmd_c3;
-   reg [7:0]   ddr2_regstat;
-   wire [7:0]  ddr2_regstat_c3;
-
-   wire        ddr2_rdwr;
-   wire        ddr2_docmd;
-   reg 	       ddr2_docmd_d;
-
-   reg [7:0]   ddr2_sm_dbg;
-   
-   ddr2_m3_core_v2 ddr2core(
-			    // external wires
-			    .mcb3_dram_dq(mcb3_dram_dq),
-			    .mcb3_dram_a(mcb3_dram_a),
-			    .mcb3_dram_ba(mcb3_dram_ba),
-			    .mcb3_dram_ras_n(mcb3_dram_ras_n),
-			    .mcb3_dram_cas_n(mcb3_dram_cas_n),
-			    .mcb3_dram_we_n(mcb3_dram_we_n),
-			    .mcb3_dram_odt(mcb3_dram_odt),
-			    .mcb3_dram_cke(mcb3_dram_cke),
-			    .mcb3_dram_dm(mcb3_dram_dm),
-			    .mcb3_dram_udqs(mcb3_dram_udqs),
-			    .mcb3_dram_udqs_n(mcb3_dram_udqs_n),
-			    .mcb3_rzq(mcb3_rzq),
-			    .mcb3_zio(mcb3_zio),
-			    .mcb3_dram_udm(mcb3_dram_udm),
-			    .mcb3_dram_dqs(mcb3_dram_dqs),
-			    .mcb3_dram_dqs_n(mcb3_dram_dqs_n),
-			    .mcb3_dram_ck(mcb3_dram_ck),
-			    .mcb3_dram_ck_n(mcb3_dram_ck_n),
-
-			    // clock and reset
-			    .c3_sys_clk(c3_sys_clk), 
-			    .c3_sys_rst_i(ddr2_reset),
-			    .c3_calib_done(c3_calib_done),
-			    .c3_clk0(c3_clk0), 
-			    .c3_rst0(c3_rst0), 
-
-			    // internal interfaces. only two brought out here for testing
-			    // port 2 - read-only
-			    .c3_p2_cmd_clk(c3_clk0),
-			    .c3_p2_cmd_en(ddr2_rd_cmd_en),
-			    .c3_p2_cmd_instr(3'b011),
-			    .c3_p2_cmd_bl(6'b1),
-			    .c3_p2_cmd_byte_addr(ddr2_test_addr_c3),
-			    .c3_p2_rd_clk(c3_clk0),
-			    .c3_p2_rd_en(ddr2_rden),
-			    .c3_p2_rd_data(ddr2_read_data_c3),
-			    .c3_p2_rd_empty(ddr2_rd_avail_n),
-
-			    // port 3 - write-only
-			    .c3_p3_cmd_clk(c3_clk0),
-			    .c3_p3_cmd_en(ddr2_wr_cmd_en),
-			    .c3_p3_cmd_instr(3'b010),
-			    .c3_p3_cmd_bl(6'b1),
-			    .c3_p3_cmd_byte_addr(ddr2_test_addr_c3),
-			    .c3_p3_wr_clk(c3_clk0),
-			    .c3_p3_wr_en(ddr2_wren),
-			    .c3_p3_wr_mask(4'hf),
-			    .c3_p3_wr_data(ddr2_write_data_c3),
-			    .c3_p3_wr_empty(ddr2_wr_empty)
-			    );
-
-   // datapath wiring
-
-   // retime register interface data to c3 clock domain
-   always @(posedge c3_clk0) begin
-      ddr2_write_data_c3 <= ddr2_write_data;
-      ddr2_test_addr_c3 <= ddr2_test_addr;
-      ddr2_regcmd_c3 <= ddr2_regcmd;
-
-      ddr2_docmd_d = ddr2_docmd; // delayed version for rising edge detect
-      ddr2_rden_d <= ddr2_rden;
-      // lock in the data only when we've got it
-      // theory is data is available one clock after rden
-      // timing is unclear though
-      if( ddr2_rden_d ) begin
-	 ddr2_read_data_c3_save <= ddr2_read_data_c3;
-      end else begin
-	 ddr2_read_data_c3_save <= ddr2_read_data_c3_save;
-      end
-   end
-
-   // retime c3 clock domain data into the register interface domain
-   always @(posedge clk26buf) begin
-      ddr2_read_data <= ddr2_read_data_c3_save;
-      ddr2_regstat <= ddr2_regstat_c3;
-
-      // debug the state machine (only effective to see if we're wedged, most transitions too fast to catch via I2C)
-      ddr2_sm_dbg[7:4] <= DDR2_WR_cstate[3:0];
-      ddr2_sm_dbg[3:0] <= DDR2_RD_cstate[3:0];
-   end
-
-   // local reset timer for ddr2
-   sync_reset  ddr2_reset_sync(
-			  .clk(c3_sys_clk),
-			  .glbl_reset(!c3_clk_locked),
-			  .reset(ddr2_reset) );
-   
-   ////// command and control mappings
-   assign ddr2_regstat_c3[0] = !ddr2_rd_avail_n;
-   assign ddr2_regstat_c3[1] = ddr2_wr_empty;
-   assign ddr2_regstat_c3[2] = c3_calib_done;
-   assign ddr2_rdwr = ddr2_regcmd_c3[0]; // 1 is read, 0 is write
-   assign ddr2_docmd = ddr2_regcmd_c3[1];
-
-   ///////////
-   //////// write state machine
-   parameter DDR2_WR_IDLE =    4'b1 << 0;
-   parameter DDR2_WR_DATA =    4'b1 << 1;
-   parameter DDR2_WR_CMD  =    4'b1 << 2;
-   parameter DDR2_WR_WAIT =    4'b1 << 3;
-
-   parameter DDR2_WR_nSTATES = 4;
-
-   reg [(DDR2_WR_nSTATES-1):0] DDR2_WR_cstate = {{(DDR2_WR_nSTATES-1){1'b0}}, 1'b1};
-   reg [(DDR2_WR_nSTATES-1):0] DDR2_WR_nstate;
-
-   always @ (posedge c3_clk0) begin
-      if (c3_rst0)
-	DDR2_WR_cstate <= DDR2_WR_IDLE; 
-      else
-	DDR2_WR_cstate <= DDR2_WR_nstate;
-   end
-
-   always @ (*) begin
-      case (DDR2_WR_cstate) //synthesis parallel_case full_case
-	DDR2_WR_IDLE: begin
-	   // trigger rising edge of command & rdrw == 0
-	   if( (!ddr2_docmd_d && ddr2_docmd) && !ddr2_rdwr ) begin
-	      DDR2_WR_nstate = DDR2_WR_DATA;
-	   end else begin
-	      DDR2_WR_nstate = DDR2_WR_IDLE;
-	   end
-	end
-	DDR2_WR_DATA: begin
-	   DDR2_WR_nstate = DDR2_WR_CMD;
-	end
-	DDR2_WR_CMD: begin
-	   DDR2_WR_nstate = DDR2_WR_WAIT;
-	end
-	DDR2_WR_WAIT: begin
-	   if( !ddr2_wr_empty ) begin
-	      DDR2_WR_nstate = DDR2_WR_WAIT;
-	   end else begin
-	      DDR2_WR_nstate = DDR2_WR_IDLE;
-	   end
-	end
-      endcase // case (DDR2_WR_cstate)
-   end
-
-   always @ (posedge c3_clk0) begin
-      if( c3_rst0 ) begin
-	 ddr2_wr_cmd_en <= 1'b0;
-	 ddr2_wren <= 1'b0;
-      end else begin
-	 case (DDR2_WR_cstate) //synthesis parallel_case full_case
-	   DDR2_WR_IDLE: begin
-	      ddr2_wr_cmd_en <= 1'b0;
-	      ddr2_wren <= 1'b0;
-	   end
-	   DDR2_WR_DATA: begin
-	      ddr2_wr_cmd_en <= 1'b0;
-	      ddr2_wren <= 1'b1;
-	   end
-	   DDR2_WR_CMD: begin
-	      ddr2_wr_cmd_en <= 1'b1;
-	      ddr2_wren <= 1'b0;
-	   end
-	   DDR2_WR_WAIT: begin
-	      ddr2_wr_cmd_en <= 1'b0;
-	      ddr2_wren <= 1'b0;
-	   end
-	 endcase // case (DDR2_WR_cstate)
-      end // else: !if( ddr2_reset )
-   end // always @ (posedge c3_clk0)
-
-   ///////////
-   //////// read state machine
-   parameter DDR2_RD_IDLE =    4'b1 << 0;
-   parameter DDR2_RD_DATA =    4'b1 << 1;
-   parameter DDR2_RD_CMD  =    4'b1 << 2;
-   parameter DDR2_RD_WAIT =    4'b1 << 3;
-
-   parameter DDR2_RD_nSTATES = 4;
-
-   reg [(DDR2_RD_nSTATES-1):0] DDR2_RD_cstate = {{(DDR2_RD_nSTATES-1){1'b0}}, 1'b1};
-   reg [(DDR2_RD_nSTATES-1):0] DDR2_RD_nstate;
-
-   always @ (posedge c3_clk0) begin
-      if (c3_rst0)
-	DDR2_RD_cstate <= DDR2_RD_IDLE; 
-      else
-	DDR2_RD_cstate <= DDR2_RD_nstate;
-   end
-
-   always @ (*) begin
-      case (DDR2_RD_cstate) //synthesis parallel_case full_case
-	DDR2_RD_IDLE: begin
-	   // trigger rising edge of command & rdrw == 1
-	   if( (!ddr2_docmd_d && ddr2_docmd) && ddr2_rdwr ) begin
-	      DDR2_RD_nstate = DDR2_RD_CMD;
-	   end else begin
-	      DDR2_RD_nstate = DDR2_RD_IDLE;
-	   end
-	end
-	DDR2_RD_CMD: begin
-	   DDR2_RD_nstate = DDR2_RD_WAIT;
-	end
-	DDR2_RD_WAIT: begin
-	   if( ddr2_rd_avail_n == 1'b0 ) begin
-	      DDR2_RD_nstate = DDR2_RD_DATA;
-	   end else begin
-	      DDR2_RD_nstate = DDR2_RD_WAIT;
-	   end
-	end
-	DDR2_RD_DATA: begin
-	   if( ddr2_rd_avail_n == 1'b0 ) begin
-	      DDR2_RD_nstate = DDR2_RD_DATA;
-	   end else begin
-	      DDR2_RD_nstate = DDR2_RD_IDLE;
-	   end
-	end
-      endcase // case (DDR2_RD_cstate)
-   end
-
-   always @ (posedge c3_clk0) begin
-      if( c3_rst0 ) begin
-	 ddr2_rd_cmd_en <= 1'b0;
-	 ddr2_rden <= 1'b0;
-      end else begin
-	 case (DDR2_RD_cstate) //synthesis parallel_case full_case
-	   DDR2_RD_IDLE: begin
-	      ddr2_rd_cmd_en <= 1'b0;
-	      ddr2_rden <= 1'b0;
-	   end
-	   DDR2_RD_CMD: begin
-	      ddr2_rd_cmd_en <= 1'b1;
-	      ddr2_rden <= 1'b0;
-	   end
-	   DDR2_RD_WAIT: begin
-	      ddr2_rd_cmd_en <= 1'b0;
-	      ddr2_rden <= 1'b0;
-	   end
-	   DDR2_RD_DATA: begin
-	      ddr2_rd_cmd_en <= 1'b0;
-	      ddr2_rden <= 1'b1;
-	   end
-	 endcase // case (DDR2_RD_cstate)
-      end // else: !if( ddr2_reset )
-   end // always @ (posedge c3_clk0)
-`endif
    
   //////////////////////////////////////
   // cheezy low speed clock divider source
@@ -652,9 +333,6 @@ module kovan (
    always @(posedge clk26buf) begin
       counter <= counter + 1;
 
-`ifdef HDMI
-      HDCP_AKSV <= Aksv14_write; // retime it into this domain to not screw up timing closure
-`endif
    end
    
    
@@ -1067,21 +745,6 @@ module kovan (
    wire [7:0] snoop_rbk_adr;
    wire [7:0] snoop_rbk_dat;
 
-`ifdef HDMI
-   // this snippet allows us to clean up an ugly special case in the original i2c engine implementation
-   // what we wanted was a holding register. What was originally implemented was adding a mux to 
-   // the *entire* register set! So we move the holding register one level up and simplified things.
-   reg [7:0]  reg_data_holding;
-   reg 	      wr_stb_d;
-   always @(posedge clk26buf) begin
-      wr_stb_d <= wr_stb;
-      if (wr_stb & !wr_stb_d) begin // only act on the rising pulse of wr_stb
-	 reg_data_holding <= reg_data_in;
-      end else begin
-	 reg_data_holding <= reg_data_holding;
-      end
-   end
-`endif
    
    wire       SDA_pd;
    wire       SDA_int;
@@ -1096,80 +759,12 @@ module kovan (
 		      .glbl_reset(glbl_reset),
 
 		      .i2c_device_addr(8'h3C),
-`ifdef HDMI
-		      .wr_stb(wr_stb),
-		      .reg_0(snoop_ctl),
-		      .reg_1(snoop_rbk_adr),
-		      .reg_2(reg_data_holding),
-		      .reg_3(comp_ctl),
-`endif
 		      
 		      .reg_8(8'h34),  // reg8-b are placeholders
 		      .reg_9(8'h0D), 
 		      .reg_a(8'hBA),
 		      .reg_b(8'hBE),
 
-`ifdef HDMI
-		      .reg_c(ext1_ctl),
-		      
-		      // hard-wired to 240, 0, 240
-		      // reg_d-f were chroma, now hard-wired to 240, 0, 240
-		      
-		      .reg_10({hdcp_requested,hdmi_vsync_pol,hdmi_hsync_pol,LOWVOLT_NOTIFY,1'b0,CEC,
-			       genlock_locked, CHUMBY_BEND}),
-
-
-		      .reg_11(lock_tolerance[7:0]),
-		      .reg_12(lock_tolerance[15:8]),
-		      
-		      .reg_13({modeline_write,modeline_adr[6:0]}),
-		      .reg_14(modeline_dat),
-
-		      .reg_15(target_lead_pixels[7:0]),
-		      .reg_16(target_lead_pixels[15:8]),
-		      .reg_17(target_lead_pixels[23:16]),
-
-		      .reg_18({rx_all_valid,
-			       rx0_blue_rdy, rx0_green_rdy, rx0_red_rdy,
-			       rx0_psalgnerr,
-			       m720p_locked, tx0_plllckd, rx0_plllckd}),
-			       
-		      .reg_19(Km[7:0]),
-		      .reg_1a(Km[15:8]),
-		      .reg_1b(Km[23:16]),
-		      .reg_1c(Km[31:24]),
-		      .reg_1d(Km[39:32]),
-		      .reg_1e(Km[47:40]),
-		      .reg_1f(Km[55:48]),
-`endif //  `ifdef HDMI
-
-`ifdef HDMI
-		      //// read-only registers after this point
-		      .reg_20(t_hactive[7:0]),
-		      .reg_21({4'b0,t_hactive[11:8]}),
-		      .reg_22(t_vactive[7:0]),
-		      .reg_23({4'b0,t_vactive[11:8]}),
-		      .reg_24(t_htotal[7:0]),
-		      .reg_25({4'b0,t_htotal[11:8]}),
-		      .reg_26(t_vtotal[7:0]),
-		      .reg_27(t_vtotal[15:8]),
-		      .reg_28(t_vtotal[23:16]),
-		      .reg_29(t_h_fp[7:0]),
-		      .reg_2a(t_h_bp[7:0]),
-		      .reg_2b(t_v_fp[7:0]),
-		      .reg_2c(t_v_fp[15:8]),
-		      .reg_2d(t_v_fp[23:16]),
-		      .reg_2e(t_v_bp[7:0]),
-		      .reg_2f(t_v_bp[15:8]),
-		      .reg_30(t_v_bp[23:16]),
-		      .reg_31(t_hsync_width[7:0]),
-		      .reg_32(t_vsync_width[7:0]),
-		      .reg_33(t_vsync_width[15:8]),
-		      .reg_34(t_vsync_width[23:16]),
-		      .reg_35(t_refclkcnt[7:0]),
-		      .reg_36(t_refclkcnt[15:8]),
-		      .reg_37(t_refclkcnt[23:16]),
-`endif //  `ifdef HDMI
 
 		      .reg_38(dna_data[7:0]),
 		      .reg_39(dna_data[15:8]),
@@ -1219,17 +814,6 @@ module kovan (
 		      .reg_5a(servo3_pwm_pulse[15:8]),
 		      .reg_5b(servo3_pwm_pulse[23:16]),
 
-`ifdef HAS_DDR   
-		      .reg_60(ddr2_write_data[7:0]),
-		      .reg_61(ddr2_write_data[15:8]),
-		      .reg_62(ddr2_write_data[23:16]),
-		      .reg_63(ddr2_write_data[31:24]),
-		      .reg_64(ddr2_test_addr[7:0]),
-		      .reg_65(ddr2_test_addr[15:8]),
-		      .reg_66(ddr2_test_addr[23:16]),
-		      .reg_67(ddr2_test_addr[29:24]),
-		      .reg_68(ddr2_regcmd[7:0]),
-`endif //  `ifdef HAS_DDR
 		      
 		      // reg_0x78 - reg_0x7f reserved for loopback testing
 		      // read-only interfaces
@@ -1239,14 +823,6 @@ module kovan (
 		      .reg_83({7'b0,adc_valid}),
 		      .reg_84(dig_in_val[7:0]),
 
-`ifdef HAS_DDR   
-		      .reg_90(ddr2_read_data[7:0]),
-		      .reg_91(ddr2_read_data[15:8]),
-		      .reg_92(ddr2_read_data[23:16]),
-		      .reg_93(ddr2_read_data[31:24]),
-		      .reg_94(ddr2_regstat[7:0]),
-		      .reg_95(ddr2_sm_dbg[7:0]),
-`endif //  `ifdef HAS_DDR
 
 		      /// extened version -- 32 bits to report versions
 		      /// kovan starts at FF.00.01.00.01
@@ -1256,90 +832,7 @@ module kovan (
 		      .reg_ff(8'h0)   // this is the MSB of the extended version field
 		      );
      
-   /////// version FF.0001.0006 (log created 6/27/2012)
-   // - remove CHG_SHDN pin driving low, as this stops board charging.
-   //   removed such that it's left floating, due to incompatibility between
-   //   the function of the pin between v3.0 and v3.1 (once v3.1 is in
-   //   production and v3.0 is retired, this can be safely used)
-   
-   /////// version FF.0001.0005 (log created 3/6/2012)
-   // - strip out DDR2 support, not needed for final design
-   // - fix PWM reset state so that it's 0 instead of 1
-   
-   /////// version FF.0001.0004 (log created 3/6/2012)
-   // - modify dim/bright settings for heartbeat to make it more apparent
-   // - fix DDR2 reset bug, core now runs instead of hanging in reset
-   // - fix LCDO_G7 pin missing in .UCF file
-   // - improve timing closure for 208 MHz motor register interface
-   
-   /////// version FF.0001.0003 (log created 3/1/2012)
-   // - fix ADC bit width
-   // - fix digital input data bit position
-   // - fix serial number bug
-   // - increase motor PWM base clock rate to 208 MHz to allow for 10kHz 12-bit PWM control
-   // - decrease DNA clock rate to 1MHz; eliminate 2MHz clock line
-   // - clean up documentation around motor and servo dividers
-   // - fix ADC channel select bit position
-   // - all motor control functions validated
-
-   /////// version FF.0001.0002 (log created 3/1/2012)
-   // - reverse direction of LRCLK to accommodate ES8328 codec restrictions
-   
-   /////// version FF.0001.0001 changes (log created 2/18/2012)
-   // - branch to kovan
-   // - FF means to check auxiliary vesion field
-   // - initial checkin of code
-
-   ////////////////////////////// legacy changes
-   /////// version 4 changes
-   // - added input registers to LCD path to clean up timing
-   // - added a pipeline stage to the core video processing pipe
-   // - adjusted the position of chroma decision versus chroma to remove right pink stripe
-   // - fixed chroma to 240, 0, 240 to reduce computational complexity
-   // - fixed timing files to get better coverage of the FPGA
-   // - inverted clock to device DNA state machine to fix hold time race condition
-   // - self-timed mode is now native, no need to switch FPGA configs
-   // - added PLL and alignment/valid feedback registers to detect when source is present
-   // - touch-up clock tree to improve clarity of timing definition & rule propagation
-   // - full switch-over to PlanAhead tool for compilation
-
-   /////// version 5 changes (log created 8/11/2011)
-   // - changed blue LED from flashing to breathing
-
-   /////// version 6 changes (log created 8/12/2011)
-   // - added off state to LED which is automatically triggered when output not plugged in
-   
-   /////// version 7 changes (log created 8/12/2011)
-   // - added SOURCE_NOTIFY reporting trigger
-   // - removed HPD debounce circuit, so HPD reports even when no source is present
-
-   /////// version 8 changes (log cerated 8/21/2011)
-   // - changed timing detector to always report the timing of the Rx stream, even in self-timed mode
-
-   /////// version 9 changes (log created 8/22/2011)
-   // - removed setbox functionality. Box is always "full screen". 
-   // Registers 4-B are now deprecated (they are NOPs if written in this implementation, may
-   // change to be active later).
-
-   /////// version A changes (log created 8/22/2011)
-   // - HDCP cipher now resets properly when Ksv is double-initialized
-   // - EDID snooper for HDCP now limits read bounds to 5 to compensate
-   //   for tivo series 3 weirdness.
-
-   /////// version B changes (log created 8/27/2011)
-   // - timing closure only
-
-   /////// version C changes (log created 8/27/2011)
-   // - fix chroma issue in overlay mode, was checking too many bits, causing jagged edges on photos
-   
-   /////// version D changes (log created 9/5/2011)
-   // - add workaround for Apple TV 2 EESS bug. ATV2 asserts EESS by far too early. Added a trap to catch
-   //   EESS when it is asserted too early relative to vsync
-
-   /////// version E changes (log created 9/29/2011)
-   // - fix RGB color depth issue; turns out that extending the LSB's isn't the right way to do it.
-   //   now, we truncate the unused bits to zero
-
+  
    /////////////// dummy tie-downs
 `ifdef HDMI
 
@@ -1361,10 +854,6 @@ module kovan (
    OBUFDS TMDS1 (.I(1'b0), .O(TX0_TMDS_P[1]), .OB(TX0_TMDS_N[1])) ;
    OBUFDS TMDS2 (.I(1'b0), .O(TX0_TMDS_P[2]), .OB(TX0_TMDS_N[2])) ;
    OBUFDS TMDS3 (.I(1'b0), .O(TX0_TMDS_P[3]), .OB(TX0_TMDS_N[3])) ;
-//   assign TX0_TMDS_P[0] = I2S_CLK1;
-//   assign TX0_TMDS_P[1] = I2S_DI1;
-//   assign TX0_TMDS_P[2] = I2S_LRCLK1;
-//   assign TX0_TMDS_P[3] = 1'b0;
 
    assign DDC_SDA_PU = 1'b0;
    assign DDC_SDA_PD = 1'b0;
