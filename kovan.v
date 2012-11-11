@@ -48,22 +48,6 @@ module kovan (
 	      input wire CHG_ACP,           // reports presence of AC power
 //	      output wire CHG_SHDN,         // leave floating
 
-	      // HDMI
-	      input wire        CEC,
-	      input  wire       DDC_SDA_LV_N,
-	      output wire       DDC_SDA_PU,
-	      output wire       DDC_SDA_PD,
-	      input  wire       DDC_SCL_LV_N,
-	      input  wire       HPD_N,
-	      output wire       HPD_NOTIFY,
-	      output wire       HPD_OVERRIDE,
-	      output wire       VSYNC_STB,
-
-	      // HDMI high speed phy lines
-	      input wire [3:0]  RX0_TMDS_P,
-	      input wire [3:0]  RX0_TMDS_N,
-	      output wire [3:0] TX0_TMDS_P,
-	      output wire [3:0] TX0_TMDS_N,
 
 	      // i/o controller digital interfaces
 	      output wire [1:0] DIG_ADC_CS,
@@ -214,8 +198,8 @@ module kovan (
 	
 	//assign FPGA_MISO = FPGA_MOSI; // loopback testing
 	wire [15:0] SPI_OUT;
-	reg [64:0][15:0] DATA_REG;
-	wire [64:0][15:0] COMMAND_REG;
+	reg [63:0][15:0] DATA_REG;
+	wire [63:0][15:0] COMMAND_REG;
 
 	// Instantiate the spi link to the pxa166 processor
 	spi pxa_spi (
@@ -282,6 +266,9 @@ module kovan (
    wire [23:0] servo1_pwm_pulse;
    wire [23:0] servo2_pwm_pulse;
    wire [23:0] servo3_pwm_pulse;
+	
+	
+   reg [55:0] dna_data;
 
    robot_iface iface(.clk(clk13buf), .glbl_reset(glbl_reset),
 		     .clk_3p2MHz(clk3p2M), .clk_208MHz(clk208M),
@@ -340,112 +327,7 @@ module kovan (
 		     );
    
    
-  //////////////////////////////////////
-  // cheezy low speed clock divider source
-  //////////////////////////////////////
-   reg [22:0] counter;
-
-   always @(posedge clk26buf) begin
-      counter <= counter + 1;
-   end
-   
-   
-   ////////////////////////////////
-   // serial number
-   ////////////////////////////////
-   reg 	clk1M_unbuf;
-   always @(posedge clk26buf) begin
-      clk1M_unbuf <= counter[6];
-   end
-   
-   BUFG clk1M_buf(.I(clk1M_unbuf), .O(clk1M));
-
-   wire dna_reset;
-   sync_reset  dna_reset_sync(
-			  .clk(clk1M),
-			  .glbl_reset(glbl_reset),
-			  .reset(dna_reset) );
-   
-   reg 	dna_pulse;
-   reg 	dna_shift;
-   wire dna_bit;
-   reg [55:0] dna_data;
-   
-   DNA_PORT device_dna( .CLK(clk1M), .DIN(1'b0), .DOUT(dna_bit), .READ(dna_pulse), .SHIFT(dna_shift) );
-   
-   parameter DNA_INIT =    4'b1 << 0;
-   parameter DNA_PULSE =   4'b1 << 1;
-   parameter DNA_SHIFT =   4'b1 << 2;
-   parameter DNA_DONE =    4'b1 << 3;
-
-   parameter DNA_nSTATES = 4;
-
-   reg [(DNA_nSTATES-1):0] DNA_cstate = {{(DNA_nSTATES-1){1'b0}}, 1'b1};
-   reg [(DNA_nSTATES-1):0] DNA_nstate;
-   reg [5:0] 		   dna_shift_count;
-
-   always @ (posedge clk1M) begin
-      if (dna_reset)
-	DNA_cstate <= DNA_INIT; 
-      else
-	DNA_cstate <= DNA_nstate;
-   end
-
-   always @ (*) begin
-      case (DNA_cstate) //synthesis parallel_case full_case
-	DNA_INIT: begin
-	   DNA_nstate = DNA_PULSE;
-	end
-	DNA_PULSE: begin
-	   DNA_nstate = DNA_SHIFT;
-	end
-	DNA_SHIFT: begin
-	   // depending on if MSB or LSB first, want to use 56 or 55
-	   // especially if serial #'s are linear-incrementing
-	   DNA_nstate = (dna_shift_count[5:0] == 6'd55) ? DNA_DONE : DNA_SHIFT;
-	end
-	DNA_DONE: begin
-	   DNA_nstate = DNA_DONE;
-	end
-      endcase // case (DNA_cstate)
-   end
-   
-   always @ (posedge clk1M) begin
-      if( dna_reset ) begin
-	   dna_shift_count <= 6'h0;
-	   dna_data <= 56'h0;
-	   dna_pulse <= 1'b0;
-	   dna_shift <= 1'b0;
-      end else begin
-	 case (DNA_cstate) //synthesis parallel_case full_case
-	   DNA_INIT: begin
-	      dna_shift_count <= 6'h0;
-	      dna_data <= 56'h0;
-	      dna_pulse <= 1'b0;
-	      dna_shift <= 1'b0;
-	   end
-	   DNA_PULSE: begin
-	      dna_shift_count <= 6'h0;
-	      dna_data <= 56'h0;
-	      dna_pulse <= 1'b1;
-	      dna_shift <= 1'b0;
-	   end
-	   DNA_SHIFT: begin
-	      dna_shift_count <= dna_shift_count + 6'b1;
-	      dna_data[55:0] <= {dna_data[54:0],dna_bit};
-	      dna_pulse <= 1'b0;
-	      dna_shift <= 1'b1;
-	   end
-	   DNA_DONE: begin
-	      dna_shift_count <= dna_shift_count;
-	      dna_data[55:0] <= dna_data[55:0];
-	      dna_pulse <= 1'b0;
-	      dna_shift <= 1'b0;
-	   end
-	 endcase // case (DNA_cstate)
-      end // else: !if( dna_reset )
-   end // always @ (posedge clk1M or posedge ~rstbtn_n)
-
+  
    ////////////////////////////////
    // heartbeat
    ////////////////////////////////
