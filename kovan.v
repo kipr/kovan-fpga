@@ -257,10 +257,17 @@ module kovan (
 	
 		// sorry, I know.... 
 		// if only we had good 2d support
-		SPI_REG[15:0] <= 16'h4A53;
-		SPI_REG[25:16] <= adc_in[9:0]; //[1][9:0]	
+		SPI_REG[15:0] <= 16'h4A53;	//r0
+		SPI_REG[31:16] <= 16'd1;   //r1
+		SPI_REG[47:32] <= 16'd2;   //r2
+		SPI_REG[63:48] <= 16'd3;   //r3
+		SPI_REG[79:64] <= 16'd4;   //r4
+		SPI_REG[95:80] <= 16'd5;   //r5
+		SPI_REG[111:96] <= 16'd6;  //r6
+		SPI_REG[127:112] <= 16'd7; //r7
+		//SPI_REG[25:16] <= adc_in[9:0]; //[1][9:0]	
 		SPI_REG[278:272] <= dig_in_val[7:0]; //[17][7:0]
-		
+
 		SPI_REG[2047:1024] <= COMMAND_REG[2047:1024];
 	end
 
