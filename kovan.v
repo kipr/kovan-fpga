@@ -236,8 +236,8 @@ module kovan (
 
 	
 	//assign FPGA_MISO = FPGA_MOSI; // loopback testing
-	reg [2047:0] SPI_REG = 2048'd0;
-	wire [2047:1024] COMMAND_REG;
+	reg [1023:0] SPI_REG = 1024'd0;
+	wire [1023:384] COMMAND_REG;
 	// DATA_REG (read only)
 	// SPI_REG[63:0]
 	// reg 0 : reserved
@@ -268,7 +268,7 @@ module kovan (
 		//SPI_REG[25:16] <= adc_in[9:0]; //[1][9:0]	
 		SPI_REG[278:272] <= dig_in_val[7:0]; //[17][7:0]
 
-		SPI_REG[2047:1024] <= COMMAND_REG[2047:1024];
+		SPI_REG[1023:384] <= COMMAND_REG[1023:384];
 	end
 
 	// Instantiate the spi link to the pxa166 processor
