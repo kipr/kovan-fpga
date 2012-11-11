@@ -6,7 +6,9 @@ module spi(
 	input		SSEL,
 	input		MOSI,
 	output	MISO,
-	output [15:0]	SPI_OUT);
+	output [15:0]	SPI_OUT,
+	input [64:0][15:0] DATA_REG,
+	output [64:0][15:0] COMMAND_REG);
 	
 	reg[2:0] SCKr;
 	
@@ -47,6 +49,9 @@ module spi(
 	
 	reg byte_received; // high when a byte is received
 	reg [15:0] byte_data_received;
+	reg [5:0] header;
+	reg [9:0] data;
+	
 	
 	always @(posedge SYS_CLK) begin
 		if (~SSEL_active)
@@ -69,6 +74,8 @@ module spi(
 	always @(posedge SYS_CLK) begin
 		if(byte_received) begin
 			SPI_OUTr <= byte_data_received;
+			header[5:0] = byte_data_received[15:10];
+			data[9:0] = byte_data_received[9:0];
 		end
 	end
 	
