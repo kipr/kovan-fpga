@@ -29,24 +29,11 @@
   
 `timescale 1 ns / 1 ps
 
-parameter C3_NUM_DQ_PINS          = 16;   // External memory data width
-parameter C3_MEM_ADDR_WIDTH       = 13;   // External memory address width
-parameter C3_MEM_BANKADDR_WIDTH   = 3;    // External memory bank address width
-
-// `define HAS_DDR    // comment out to remove DDR interface (does not currently work)
-
 module kovan (
-	      // camera IF
-	      output wire [7:0] CAM_D,
-	      output wire       CAM_HSYNC,  // sync
-	      output wire       CAM_VSYNC,  // pix valid / hsync
-	      input wire        CAM_MCLKO,  // pixel master clock
-	      input wire        CAM_VCLKO,  // pixel clock from CPU
-	      output wire       CAM_PCLKI,  // return pixel clock
 
 	      // power management
 	      input wire CHG_ACP,           // reports presence of AC power
-//	      output wire CHG_SHDN,         // leave floating
+			//output wire CHG_SHDN,         // leave floating
 
 
 	      // i/o controller digital interfaces
@@ -110,7 +97,6 @@ module kovan (
 	      input wire [5:0]  LCD_SUPP,
 	      input wire        LCD_VS,
 	      output wire       LCD_CLK_T,  // clock is sourced from the FPGA
-	      // for forward compatibility with HDMI-synced streams
 
 	      // SSP interface to the CPU
 	      output wire       FPGA_MISO,
@@ -122,12 +108,11 @@ module kovan (
 	      input wire        PWR_SCL,  // we listen on this one
 	      inout wire        PWR_SDA,
 
-	      input wire        XI2CSCL,  // our primary interface
-	      inout wire        XI2CSDA,
+	      //input wire        XI2CSCL,  // our primary interface
+	      //inout wire        XI2CSDA,
 
 	      // LED
 	      output wire       FPGA_LED,
-
 	      
 	      input wire       OSC_CLK   // 26 mhz clock from CPU
 	      );
@@ -195,24 +180,6 @@ module kovan (
       lcd_reset_n <= !lcd_reset;
    end
 	
-	
-	//assign FPGA_MISO = FPGA_MOSI; // loopback testing
-	wire [15:0] SPI_OUT;
-	reg [63:0][15:0] DATA_REG;
-	wire [63:0][15:0] COMMAND_REG;
-
-	// Instantiate the spi link to the pxa166 processor
-	spi pxa_spi (
-		.SYS_CLK(clk208M), 
-		.SPI_CLK(FPGA_SCLK), 
-		.SSEL(FPGA_SYNC), 
-		.MOSI(FPGA_MOSI), 
-		.MISO(FPGA_MISO), 
-		.SPI_OUT(SPI_OUT),
-		.DATA_REG(DATA_REG),
-		.COMMAND_REG(COMMAND_REG)
-	);
-
    assign LCDO_B[7:3] = lcd_pipe_b[5:1];
    assign LCDO_G[7:2] = lcd_pipe_g[5:0];
    assign LCDO_R[7:2] = lcd_pipe_r[5:0];
@@ -266,9 +233,48 @@ module kovan (
    wire [23:0] servo1_pwm_pulse;
    wire [23:0] servo2_pwm_pulse;
    wire [23:0] servo3_pwm_pulse;
+
 	
+	//assign FPGA_MISO = FPGA_MOSI; // loopback testing
+	reg [2047:0] SPI_REG = 2048'd0;
+	wire [2047:1024] COMMAND_REG;
+	// DATA_REG (read only)
+	// SPI_REG[63:0]
+	// reg 0 : reserved
+	// reg 16:1  for analog input vals
+	// reg 17 digital input vals
+	//
+	// COMMAND_REG (write only)
+	// SPI_REG[127:64]
+	// reg 64 : reserved
+	// reg 65 digital output enables
+	// reg 66 digital pullups
+	// reg 67 analog pullups
+	// reg 68 digital output vals
+
+
+	always @(posedge clk208M) begin
 	
-   reg [55:0] dna_data;
+		// sorry, I know.... 
+		// if only we had good 2d support
+		SPI_REG[15:0] <= 16'h4A53;
+		SPI_REG[25:16] <= adc_in[9:0]; //[1][9:0]	
+		SPI_REG[278:272] <= dig_in_val[7:0]; //[17][7:0]
+		
+		SPI_REG[2047:1024] <= COMMAND_REG[2047:1024];
+	end
+
+	// Instantiate the spi link to the pxa166 processor
+	spi pxa_spi (
+		.SYS_CLK(clk208M), 
+		.SPI_CLK(FPGA_SCLK), 
+		.SSEL(FPGA_SYNC), 
+		.MOSI(FPGA_MOSI), 
+		.MISO(FPGA_MISO), 
+		.SPI_REG(SPI_REG),
+		.COMMAND_REG(COMMAND_REG)
+	);
+
 
    robot_iface iface(.clk(clk13buf), .glbl_reset(glbl_reset),
 		     .clk_3p2MHz(clk3p2M), .clk_208MHz(clk208M),
@@ -335,13 +341,5 @@ module kovan (
 		 .bright(12'b0001_1111_1000), .dim(12'b0000_0000_1000) );
 
    assign FPGA_LED = !blue_led;
-
-   
-   assign CAM_PCLKI = 1'b0;
-   assign CAM_HSYNC = 1'b0;
-   assign CAM_VSYNC = 1'b0;
-   //assign FPGA_MISO = 1'b0;
-   assign CAM_D[7:0] = 8'b0;
-//   assign CHG_SHDN = 1'b0; // leave floating as on-board pulldown does the trick
 
 endmodule // kovan
