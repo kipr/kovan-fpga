@@ -212,7 +212,19 @@ module kovan (
    end
 	
 	
-	assign FPGA_MISO = FPGA_MOSI; // loopback testing
+	//assign FPGA_MISO = FPGA_MOSI; // loopback testing
+	wire [15:0] SPI_OUT;
+
+	// Instantiate the spi link to the pxa166 processor
+	spi pxa_spi (
+		.SYS_CLK(clk208M), 
+		.SPI_CLK(FPGA_SCLK), 
+		.SSEL(FPGA_SYNC), 
+		.MOSI(FPGA_MOSI), 
+		.MISO(FPGA_MISO), 
+		.SPI_OUT(SPI_OUT)
+	);
+	
 
    assign LCDO_B[7:3] = lcd_pipe_b[5:1];
    assign LCDO_G[7:2] = lcd_pipe_g[5:0];
