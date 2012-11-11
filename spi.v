@@ -7,8 +7,8 @@ module spi(
 	input		MOSI,
 	output	MISO,
 	output [15:0]	SPI_OUT,
-	input [64:0][15:0] DATA_REG,
-	output [64:0][15:0] COMMAND_REG);
+	input [63:0][15:0] DATA_REG,
+	output [63:0][15:0] COMMAND_REG);
 	
 	reg[2:0] SCKr;
 	
