@@ -257,20 +257,48 @@ module kovan (
 	
 		// sorry, I know.... 
 		// if only we had good 2d support
-		SPI_REG[15:0] <= 16'h4A53;	//r0
-		SPI_REG[31:16] <= 16'd1;   //r1
-		SPI_REG[47:32] <= 16'd2;   //r2
-		SPI_REG[63:48] <= 16'd3;   //r3
-		SPI_REG[79:64] <= 16'd4;   //r4
-		SPI_REG[95:80] <= 16'd5;   //r5
-		SPI_REG[111:96] <= 16'd6;  //r6
-		SPI_REG[127:112] <= 16'd7; //r7
-		//SPI_REG[25:16] <= adc_in[9:0]; //[1][9:0]	
-		SPI_REG[278:272] <= dig_in_val[7:0]; //[17][7:0]
+		
+		//	READ Only
+		SPI_REG[15:0] <= 16'h4A53;						// r00
+		SPI_REG[31:16] <= {8'h00, dig_out_val};	// r01
+		SPI_REG[47:32] <= {6'h00, adc_in};			// r02
+		
+		SPI_REG[303:288] <= {15'h00, adc_valid};	// r18
+		SPI_REG[319:304] <= {15'h00, dig_val_good};	// r19
+		SPI_REG[335:320] <= {15'h00, dig_busy};	// r20
+	
+	
+		SPI_REG[1023:384] <= {COMMAND_REG[1023:400], 16'h6677};//COMMAND_REG[1023:384];
 
-		SPI_REG[1023:384] <= COMMAND_REG[1023:384];
+
 	end
 
+
+	
+	
+		// READ/WRITE
+	//	assign servo0_pwm_pulse[23:8] = SPI_REG[415:400];	// r25
+	//	assign servo1_pwm_pulse[23:8] = SPI_REG[431:416];	// r26
+	//	assign servo2_pwm_pulse[23:8] = SPI_REG[447:432];	// r27
+	//	assign servo3_pwm_pulse[23:8] = SPI_REG[463:448];	// r28
+
+//		assign dig_pu[7:0] = SPI_REG[487:480];					// r30
+//		assign dig_oe[7:0] = SPI_REG[503:496];					// r31
+//		assign ana_pu[7:0] = SPI_REG[519:512];					// r32
+		assign mot_pwm_duty[15:0] = SPI_REG[543:528];		// r33
+
+//		assign dig_sample = SPI_REG[592];// r37
+//		assign dig_update = SPI_REG[608];// r38				
+		assign mot_drive_code[7:0] = SPI_REG[631:624];	// r39
+		assign mot_allstop = SPI_REG[640];	// r40
+//		assign adc_chan[3:0] = SPI_REG[659:656];	// r41
+//		assign adc_go = SPI_REG[672];	// r42
+	
+	//	assign servo_pwm_period[23:8] = SPI_REG[991:976];	// r61
+		assign mot_pwm_div[15:8] = SPI_REG[1007:992];		// r62
+
+
+		
 	// Instantiate the spi link to the pxa166 processor
 	spi pxa_spi (
 		.SYS_CLK(clk208M), 

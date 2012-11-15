@@ -148,7 +148,6 @@ module spi(
 					
 					SPI_OUTr[15:0] <= byte_data_received[15:0];//echo back the value
 					
-					// TODO: set the new value
 					case(address)
 						10'd24: 	COMMAND_REGr <= {SPI_REGr[1023:400], byte_data_received};
 						10'd25: 	COMMAND_REGr <= {SPI_REGr[1023:416], byte_data_received, SPI_REGr[399:384]};
@@ -190,7 +189,6 @@ module spi(
 						10'd61: 	COMMAND_REGr <= {SPI_REGr[1023:992], byte_data_received, SPI_REGr[975:384]};
 						10'd62: 	COMMAND_REGr <= {SPI_REGr[1023:1008], byte_data_received, SPI_REGr[991:384]};
 						10'd63: 	COMMAND_REGr <= {byte_data_received, SPI_REGr[1007:384]};
-
 						default: COMMAND_REGr[1023:384] <= {SPI_REGr[1023:384]}; // no change
 					endcase
 					
@@ -203,7 +201,7 @@ module spi(
 					if (byte_data_received[15:14] == 2'b10) begin
 						// transition to read
 						SPI_OUTr[15:0] <= SPI_REGr[15:0]; // reg 0
-						address[9:0] <= 10'd0;
+						address[9:0] <= 10'd1; // already queued reg 0, reg 1 is next
 					end else if (byte_data_received[15:14] == 2'b01) begin
 						// transition to write
 						address[9:0] <= byte_data_received[9:0];
