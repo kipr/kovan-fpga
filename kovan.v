@@ -251,7 +251,7 @@ module kovan (
 	// reg 66 digital pullups
 	// reg 67 analog pullups
 	// reg 68 digital output vals
-
+	reg [7:0] dig_out_val_r = 8'h00;
 
 	always @(posedge clk26buf) begin
 	
@@ -269,32 +269,35 @@ module kovan (
 	
 	
 		SPI_REG[687:384] <= {COMMAND_REG[687:400], 16'h6677};//COMMAND_REG[1023:384];
-	end
-
-
 	
-	
-		// READ/WRITE
-		assign servo0_pwm_pulse[23:0] = {SPI_REG[415:400], 8'h00};	// r25
-		assign servo1_pwm_pulse[23:0] = {SPI_REG[431:416], 8'h00};	// r26
-		assign servo2_pwm_pulse[23:0] = {SPI_REG[447:432], 8'h00};	// r27
-		assign servo3_pwm_pulse[23:0] = {SPI_REG[463:448], 8'h00};	// r28
+		// pipeline this (takes too long)
+		dig_out_val_r <= SPI_REG[471:464];	// r29
+		
+	end	
+		
+		
+	// READ/WRITE
+	assign servo0_pwm_pulse[23:0] = {SPI_REG[415:400], 8'h00};	// r25
+	assign servo1_pwm_pulse[23:0] = {SPI_REG[431:416], 8'h00};	// r26
+	assign servo2_pwm_pulse[23:0] = {SPI_REG[447:432], 8'h00};	// r27
+	assign servo3_pwm_pulse[23:0] = {SPI_REG[463:448], 8'h00};	// r28
 
-		assign dig_pu[7:0] = SPI_REG[487:480];					// r30
-		assign dig_oe[7:0] = SPI_REG[503:496];					// r31
-		assign ana_pu[7:0] = SPI_REG[519:512];					// r32
-		assign mot_pwm_duty[15:0] = SPI_REG[543:528];		// r33
 
+	assign dig_out_val[7:0] = dig_out_val_r[7:0];//SPI_REG[471:464];			// r29
+	assign dig_pu[7:0] = SPI_REG[487:480];					// r30
+	assign dig_oe[7:0] = SPI_REG[503:496];					// r31
+	assign ana_pu[7:0] = SPI_REG[519:512];					// r32
+	assign mot_pwm_duty[15:0] = SPI_REG[543:528];		// r33
 
-		assign servo_pwm_period[23:0] = {SPI_REG[559:544], 8'h00};	// r34
-		assign mot_pwm_div[15:8] = SPI_REG[575:560];		// r35
+	assign servo_pwm_period[23:0] = {SPI_REG[559:544], 8'h00};	// r34
+	assign mot_pwm_div[15:8] = SPI_REG[575:560];		// r35
 
-		assign dig_sample = SPI_REG[592];// r37
-		assign dig_update = SPI_REG[608];// r38				
-		assign mot_drive_code[7:0] = SPI_REG[631:624];	// r39
-		assign mot_allstop = SPI_REG[640];	// r40
-		assign adc_chan[3:0] = SPI_REG[659:656];	// r41
-		assign adc_go = SPI_REG[672];	// r42
+	assign dig_sample = SPI_REG[592];// r37
+	assign dig_update = SPI_REG[608];// r38				
+	assign mot_drive_code[7:0] = SPI_REG[631:624];	// r39
+	assign mot_allstop = SPI_REG[640];	// r40
+	assign adc_chan[3:0] = SPI_REG[659:656];	// r41
+	assign adc_go = SPI_REG[672];	// r42
 	
 
 
