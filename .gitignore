@@ -36,7 +36,6 @@ _ngo/*
 *.mrp
 *.ngr
 *.ngd
-*.bit
 *.log
 *.xwbt
 *.txt
