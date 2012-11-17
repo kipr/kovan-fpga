@@ -7,7 +7,8 @@ module spi(
 	input		MOSI,
 	output	MISO,
 	input [687:0] SPI_REG,
-	output [687:384] COMMAND_REG);
+	output [687:384] COMMAND_REG
+	);
 	
 	
 	reg [2:0] SCKr; // SPI Clock

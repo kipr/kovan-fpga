@@ -31,100 +31,97 @@
 
 module kovan (
 
-	      // power management
-	      input wire CHG_ACP,           // reports presence of AC power
-			//output wire CHG_SHDN,         // leave floating
+	// power management
+	input wire CHG_ACP,           // reports presence of AC power
+	//output wire CHG_SHDN,         // leave floating
 
 
-	      // i/o controller digital interfaces
-	      output wire [1:0] DIG_ADC_CS,
-	      output wire       DIG_ADC_IN,
-	      input wire        DIG_ADC_OUT,
-	      output wire       DIG_ADC_SCLK,
-	      output wire       DIG_ADC_CLR,
-	      output wire       DIG_IN,
-	      input wire        DIG_OUT,
-	      output wire       DIG_RCLK,
-	      output wire       DIG_SAMPLE,
-	      output wire       DIG_SCLK,
-	      output wire       DIG_SRLOAD,
-	      output wire       DIG_CLR_N,
+	// i/o controller digital interfaces
+	output wire [1:0] DIG_ADC_CS,
+	output wire       DIG_ADC_IN,
+	input wire        DIG_ADC_OUT,
+	output wire       DIG_ADC_SCLK,
+	output wire       DIG_ADC_CLR,
+	output wire       DIG_IN,
+	input wire        DIG_OUT,
+	output wire       DIG_RCLK,
+	output wire       DIG_SAMPLE,
+	output wire       DIG_SCLK,
+	output wire       DIG_SRLOAD,
+	output wire       DIG_CLR_N,
 
-	      // motor direct drive interfaces
-	      output wire [3:0] MBOT,
-	      output wire [3:0] MTOP,
-	      output wire       MOT_EN,
-	      output wire [3:0] M_SERVO,
+	// motor direct drive interfaces
+	output wire [3:0] MBOT,
+	output wire [3:0] MTOP,
+	output wire       MOT_PWM,
+	output wire [3:0] M_SERVO,
 
-	      // optional uart to outside world
-	      input wire        EXT_TO_HOST_UART, // for now we're a fly on the wall
-	      input wire        HOST_TO_EXT_UART,
+	// optional uart to outside world
+	input wire        EXT_TO_HOST_UART, // for now we're a fly on the wall
+	input wire        HOST_TO_EXT_UART,
 
-	      // infrared receiver 
-	      input wire        IR_RX,
+	// infrared receiver 
+	input wire        IR_RX,
 
-	      // switch
-	      input wire        INPUT_SW0,
+	// switch
+	input wire        INPUT_SW0,
 
-	      // audio pass-through
-	      input wire        I2S_CDCLK0, // master reference clock to audio PLL
-	      output wire       I2S_CDCLK1,
-	      output wire       I2S_CLK0,   // return sample clock to CPU
-	      input wire        I2S_CLK1,
-	      input wire        I2S_DI0,    // audio data to playback
-	      output wire       I2S_DI1,
-	      output wire       I2S_DO0,    // audio data from record
-	      input wire        I2S_DO1,
-	      output wire       I2S_LRCLK0, // left/right clock to codec
-	      input wire        I2S_LRCLK1,
+	// audio pass-through
+	input wire        I2S_CDCLK0, // master reference clock to audio PLL
+	output wire       I2S_CDCLK1,
+	output wire       I2S_CLK0,   // return sample clock to CPU
+	input wire        I2S_CLK1,
+	input wire        I2S_DI0,    // audio data to playback
+	output wire       I2S_DI1,
+	output wire       I2S_DO0,    // audio data from record
+	input wire        I2S_DO1,
+	output wire       I2S_LRCLK0, // left/right clock to codec
+	input wire        I2S_LRCLK1,
 
-	      // LCD output to display
-	      output wire [7:3] LCDO_B,  // note truncation of blue channel
-	      output wire [7:2] LCDO_G,
-	      output wire [7:2] LCDO_R,
-	      output wire       LCDO_DEN,
-	      output wire       LCDO_DOTCLK,
-	      output wire       LCDO_HSYNC,
-	      output wire       LCDO_RESET_N,
-	      output wire       LCDO_VSYNC,
+	// LCD output to display
+	output wire [7:3] LCDO_B,  // note truncation of blue channel
+	output wire [7:2] LCDO_G,
+	output wire [7:2] LCDO_R,
+	output wire       LCDO_DEN,
+	output wire       LCDO_DOTCLK,
+	output wire       LCDO_HSYNC,
+	output wire       LCDO_RESET_N,
+	output wire       LCDO_VSYNC,
 
-	      // LCD input from CPU
-	      input wire [5:0]  LCD_B,  // note no truncation of data in
-	      input wire [5:0]  LCD_G,
-	      input wire [5:0]  LCD_R,
-	      input wire        LCD_DEN,
-	      input wire        LCD_HS,
-	      input wire [5:0]  LCD_SUPP,
-	      input wire        LCD_VS,
-	      output wire       LCD_CLK_T,  // clock is sourced from the FPGA
+	// LCD input from CPU
+	input wire [5:0]  LCD_B,  // note no truncation of data in
+	input wire [5:0]  LCD_G,
+	input wire [5:0]  LCD_R,
+	input wire        LCD_DEN,
+	input wire        LCD_HS,
+	input wire [5:0]  LCD_SUPP,
+	input wire        LCD_VS,
+	output wire       LCD_CLK_T,  // clock is sourced from the FPGA
 
-	      // SSP interface to the CPU
-	      output wire       FPGA_MISO,
-	      input wire        FPGA_MOSI,
-	      input wire        FPGA_SCLK,
-	      input wire        FPGA_SYNC,
+	// SSP interface to the CPU
+	output wire       FPGA_MISO,
+	input wire        FPGA_MOSI,
+	input wire        FPGA_SCLK,
+	input wire        FPGA_SYNC,
 
-	      // I2C interfaces
-	      input wire        PWR_SCL,  // we listen on this one
-	      inout wire        PWR_SDA,
+	// I2C interfaces
+	input wire        PWR_SCL,  // we listen on this one
+	inout wire        PWR_SDA,
 
-	      //input wire        XI2CSCL,  // our primary interface
-	      //inout wire        XI2CSDA,
+	// LED
+	output wire       FPGA_LED,
 
-	      // LED
-	      output wire       FPGA_LED,
-	      
-	      input wire       OSC_CLK   // 26 mhz clock from CPU
-	      );
+	input wire       OSC_CLK   // 26 mhz clock from CPU
+	);
 
    ///////// clock buffers
-   wire            clk26;
-   wire 	   clk26ibuf;
-   wire 	   clk26buf;
-   wire 	   clk13buf;
-   wire            clk3p2M;
-   wire 	   clk208M;
-   wire            clk1M;  // wired up in the serial number section
+   wire		clk26;
+   wire		clk26ibuf;
+   wire		clk26buf;
+   wire		clk13buf;
+   wire		clk3p2M;
+   wire		clk208M;
+   wire		clk1M;  // wired up in the serial number section
    
    assign clk26 = OSC_CLK;
    IBUFG clk26buf_ibuf(.I(clk26), .O(clk26ibuf));
@@ -223,8 +220,11 @@ module kovan (
    wire       adc_valid;
    wire       adc_go;
 
-   wire [15:0] mot_pwm_div;
-   wire [15:0] mot_pwm_duty;
+   wire [11:0] mot_duty0;
+	wire [11:0] mot_duty1;
+	wire [11:0] mot_duty2;   
+	wire [11:0] mot_duty3;
+
    wire [7:0]  mot_drive_code;
    wire        mot_allstop;
 
@@ -233,7 +233,7 @@ module kovan (
    wire [23:0] servo1_pwm_pulse;
    wire [23:0] servo2_pwm_pulse;
    wire [23:0] servo3_pwm_pulse;
-
+	
 	
 	//assign FPGA_MISO = FPGA_MOSI; // loopback testing
 	reg [687:0] SPI_REG = 688'd0;
@@ -268,7 +268,7 @@ module kovan (
 		SPI_REG[335:320] <= {15'h00, dig_busy};	// r20
 	
 	
-		SPI_REG[687:384] <= {COMMAND_REG[687:400], 16'h6677};//COMMAND_REG[1023:384];
+		SPI_REG[687:384] <= {COMMAND_REG[687:542], 1'b0, COMMAND_REG[540:400], 16'h6677};//COMMAND_REG[1023:384];
 	
 		// pipeline this (takes too long)
 		dig_out_val_r <= SPI_REG[471:464];	// r29
@@ -283,26 +283,25 @@ module kovan (
 	assign servo3_pwm_pulse[23:0] = {SPI_REG[463:448], 8'h00};	// r28
 
 
-	assign dig_out_val[7:0] = dig_out_val_r[7:0];//SPI_REG[471:464];			// r29
+	assign dig_out_val[7:0] = dig_out_val_r[7:0];   	// pipeline
 	assign dig_pu[7:0] = SPI_REG[487:480];					// r30
 	assign dig_oe[7:0] = SPI_REG[503:496];					// r31
 	assign ana_pu[7:0] = SPI_REG[519:512];					// r32
-	assign mot_pwm_duty[15:0] = SPI_REG[543:528];		// r33
+	assign mot_duty0[11:0] = SPI_REG[539:528];			// r33
+	assign mot_duty1[11:0] = SPI_REG[555:544];			// r34
+	assign mot_duty2[11:0] = SPI_REG[571:560];			// r35
+	assign mot_duty3[11:0] = SPI_REG[587:576];			// r36
 
-	assign servo_pwm_period[23:0] = {SPI_REG[559:544], 8'h00};	// r34
-	assign mot_pwm_div[15:8] = SPI_REG[575:560];		// r35
-
+	assign servo_pwm_period[23:0] =  24'h03F7A0;
+	
 	assign dig_sample = SPI_REG[592];// r37
 	assign dig_update = SPI_REG[608];// r38				
 	assign mot_drive_code[7:0] = SPI_REG[631:624];	// r39
 	assign mot_allstop = SPI_REG[640];	// r40
 	assign adc_chan[3:0] = SPI_REG[659:656];	// r41
 	assign adc_go = SPI_REG[672];	// r42
-	
-
 
 		
-	// Instantiate the spi link to the pxa166 processor
 	spi pxa_spi (
 		.SYS_CLK(clk208M), 
 		.SPI_CLK(FPGA_SCLK), 
@@ -314,69 +313,109 @@ module kovan (
 	);
 
 
-   robot_iface iface(.clk(clk13buf), .glbl_reset(glbl_reset),
-		     .clk_3p2MHz(clk3p2M), .clk_208MHz(clk208M),
+	quad_motor motor_controller (
+		.clk(clk26buf),
+		.MOT_EN(!mot_all_stop),
+		.duty0(mot_duty0),
+		.duty1(mot_duty1),
+		.duty2(mot_duty2),
+		.duty3(mot_duty3),
+		.drive_code(mot_drive_code),
+		.pwm(MOT_PWM),
+		.MBOT(MBOT[3:0]),
+		.MTOP(MTOP[3:0])
+	);
 
-	     // digital i/o block
-	     .dig_out_val(dig_out_val),
-	     .dig_oe(dig_oe),
-	     .dig_pu(dig_pu),
-	     .ana_pu(ana_pu),
-	     .dig_in_val(dig_in_val),
-	     .dig_val_good(dig_val_good), // output value is valid when high
-	     .dig_busy(dig_busy),    // chain is busy when high
-	     .dig_sample(dig_sample),  // samples input on rising edge
-	     .dig_update(dig_update),  // updates chain on rising edge
 
-	     // ADC interface
-	     .adc_in(adc_in),
-	     .adc_chan(adc_chan),    // channels 0-7 are for user, 8-15 are for motor current fbk
-	     .adc_valid(adc_valid),
-	     .adc_go(adc_go),  
+   reg [3:0] m_servo_out;
+   wire [3:0] m_servo_out_r;
 
-	     // motor driver interface
-	     .mot_pwm_div(mot_pwm_div),
-	     .mot_pwm_duty(mot_pwm_duty),
-	     .mot_drive_code(mot_drive_code), // 2 bits/chan, 00 = stop, 01 = forward, 10 = rev, 11 = stop
-	     .mot_allstop(mot_allstop),
+	always @ (posedge clk26buf) begin
+		m_servo_out <= m_servo_out_r;
+	end
+	
+   servo_pwm servo0_chan (
+		.clk(clk),
+		.period(servo_pwm_period),
+		.pulse(servo0_pwm_pulse),
+		.pwm_output(m_servo_out_r[0])
+	);
 
-	     // servo interface
-	     .servo_pwm_period(servo_pwm_period), // total period for the servo update
-	     .servo0_pwm_pulse(servo0_pwm_pulse), // pulse width in absolute time
-	     .servo1_pwm_pulse(servo1_pwm_pulse),
-	     .servo2_pwm_pulse(servo2_pwm_pulse),
-	     .servo3_pwm_pulse(servo3_pwm_pulse),
+   servo_pwm servo1_chan (
+		.clk(clk),
+		.period(servo_pwm_period),
+		.pulse(servo1_pwm_pulse),
+		.pwm_output(m_servo_out_r[1])
+	);
 
-	     /////// physical interfaces to outside the chip
-	     // motors
-	     .MBOT(MBOT[3:0]),
-	     .MTOP(MTOP[3:0]),
-	     .MOT_EN(MOT_EN),
-	     .M_SERVO(M_SERVO[3:0]),
+   servo_pwm servo2_chan (
+		.clk(clk),
+		.period(servo_pwm_period),
+		.pulse(servo2_pwm_pulse),
+		.pwm_output(m_servo_out_r[2])
+	);
 
-	     // analog interface
-	     .DIG_ADC_CS(DIG_ADC_CS),
-	     .DIG_ADC_IN(DIG_ADC_IN),
-	     .DIG_ADC_OUT(DIG_ADC_OUT),
-	     .DIG_ADC_SCLK(DIG_ADC_SCLK),
+   servo_pwm servo3_chan (
+		.clk(clk),
+		.period(servo_pwm_period),
+		.pulse(servo3_pwm_pulse),
+		.pwm_output(m_servo_out_r[3])
+	);
 
-	     // digital interface
-	     .DIG_IN(DIG_IN),
-	     .DIG_OUT(DIG_OUT),
-	     .DIG_RCLK(DIG_RCLK),
-	     .DIG_SAMPLE(DIG_SAMPLE),
-	     .DIG_SCLK(DIG_SCLK),
-	     .DIG_SRLOAD(DIG_SRLOAD),
-	     .DIG_CLR_N(DIG_CLR_N)
-		     );
+   assign M_SERVO[0] = !m_servo_out[0]; // invert to compensate inverting level converters
+   assign M_SERVO[1] = !m_servo_out[1];
+   assign M_SERVO[2] = !m_servo_out[2];
+   assign M_SERVO[3] = !m_servo_out[3];
+
+
+
+   robot_iface iface(
+		.clk(clk13buf), 
+		.glbl_reset(glbl_reset),
+		.clk_3p2MHz(clk3p2M), 
+		.clk_208MHz(clk208M),
+
+		// digital i/o block
+		.dig_out_val(dig_out_val),
+		.dig_oe(dig_oe),
+		.dig_pu(dig_pu),
+		.ana_pu(ana_pu),
+		.dig_in_val(dig_in_val),
+		.dig_val_good(dig_val_good), // output value is valid when high
+		.dig_busy(dig_busy),    // chain is busy when high
+		.dig_sample(dig_sample),  // samples input on rising edge
+		.dig_update(dig_update),  // updates chain on rising edge
+
+		// ADC interface
+		.adc_in(adc_in),
+		.adc_chan(adc_chan),    // ch 0-7 for user, 8-15 for mot current fbk
+		.adc_valid(adc_valid),
+		.adc_go(adc_go),  
+
+		// analog interface
+		.DIG_ADC_CS(DIG_ADC_CS),
+		.DIG_ADC_IN(DIG_ADC_IN),
+		.DIG_ADC_OUT(DIG_ADC_OUT),
+		.DIG_ADC_SCLK(DIG_ADC_SCLK),
+
+		// digital interface
+		.DIG_IN(DIG_IN),
+		.DIG_OUT(DIG_OUT),
+		.DIG_RCLK(DIG_RCLK),
+		.DIG_SAMPLE(DIG_SAMPLE),
+		.DIG_SCLK(DIG_SCLK),
+		.DIG_SRLOAD(DIG_SRLOAD),
+		.DIG_CLR_N(DIG_CLR_N)
+	);
    
    
-  
-   ////////////////////////////////
-   // heartbeat
-   ////////////////////////////////
-   pwm heartbeat(.clk812k(clk1M), .pwmout(blue_led),
-		 .bright(12'b0001_1111_1000), .dim(12'b0000_0000_1000) );
+ 
+	pwm heartbeat(
+		.clk812k(clk1M), 
+		.pwmout(blue_led),
+		.bright(12'b0001_1111_1000), 
+		.dim(12'b0000_0000_1000) 
+	);
 
    assign FPGA_LED = !blue_led;
 

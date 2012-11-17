@@ -49,25 +49,16 @@ module robot_iface(
 	     output reg       adc_valid,
 	     input wire       adc_go,  
 
-	     // motor driver interface
-	     input wire [15:0] mot_pwm_div,
-	     input wire [15:0] mot_pwm_duty,
-	     input wire [7:0]  mot_drive_code, // 2 bits/chan, 00 = stop, 01 = forward, 10 = rev, 11 = stop
-	     input wire        mot_allstop,
 
 	     // servo interface
-	     input wire [23:0] servo_pwm_period, // total period for the servo update
-	     input wire [23:0] servo0_pwm_pulse, // pulse width in absolute time
-	     input wire [23:0] servo1_pwm_pulse,
-	     input wire [23:0] servo2_pwm_pulse,
-	     input wire [23:0] servo3_pwm_pulse,
+	     //input wire [23:0] servo_pwm_period, // total period for the servo update
+	     //input wire [23:0] servo0_pwm_pulse, // pulse width in absolute time
+	     //input wire [23:0] servo1_pwm_pulse,
+	     //input wire [23:0] servo2_pwm_pulse,
+	     //input wire [23:0] servo3_pwm_pulse,
 
 	     /////// physical interfaces to outside the chip
-	     // motors
-	     output reg [3:0] MBOT,
-	     output reg [3:0] MTOP,
-	     output wire       MOT_EN,
-	     output wire [3:0] M_SERVO,
+	     //output wire [3:0] M_SERVO,
 
 	     // analog interface
 	     output wire [1:0] DIG_ADC_CS,
@@ -261,52 +252,7 @@ module robot_iface(
    /////////////////////////////////
    //////////////////////// PWM block
    /////////////////////////////////
-   
-   ///////// motor PWM prescaler
-   reg pwm_clk;
-   reg pwm_clk_a;
-   reg [15:0] pwm_scaler;
-   wire      pwmclk;
-   reg [15:0] mot_pwm_div_r;
-      
-   always @(posedge clk_208MHz) begin
-      mot_pwm_div_r <= mot_pwm_div; // decouple timing to local domain
-      
-      if( (pwm_scaler > mot_pwm_div_r) || (&pwm_scaler) ) begin
-	 pwm_scaler <= 0;
-	 pwm_clk_a <= 1;
-      end else begin
-	 pwm_clk_a <= 0;
-	 pwm_scaler <= pwm_scaler + 1;
-      end
-   end // always @ (posedge clk or posedge reset)
-
-   always @(posedge clk_208MHz) begin
-      pwm_clk <= pwm_clk_a; // just to clean everything up, no glitches on clock
-   end
-
-   BUFG pwmclkbuf(.I(pwm_clk), .O(pwmclk));
-
-   ///////// PWM for motors -- one PWM for all four channels
-   mot_pwm mot1_chan (.clk(pwmclk),
-		     .duty_cycle(mot_pwm_duty[11:0]), // note only 12 bits used, set in lower module
-		     .pwm_output(MOT_EN));
-
-   ///////// motor direction controls
-   always @(posedge clk) begin
-      MBOT[0] <= ((mot_drive_code[1:0] == 2'b10) ? 1'b1 : 1'b0) & !mot_allstop;
-      MTOP[0] <= ((mot_drive_code[1:0] == 2'b01) ? 1'b1 : 1'b0) & !mot_allstop;
-      
-      MBOT[1] <= ((mot_drive_code[3:2] == 2'b10) ? 1'b1 : 1'b0) & !mot_allstop;
-      MTOP[1] <= ((mot_drive_code[3:2] == 2'b01) ? 1'b1 : 1'b0) & !mot_allstop;
-
-      MBOT[2] <= ((mot_drive_code[5:4] == 2'b10) ? 1'b1 : 1'b0) & !mot_allstop;
-      MTOP[2] <= ((mot_drive_code[5:4] == 2'b01) ? 1'b1 : 1'b0) & !mot_allstop;
-
-      MBOT[3] <= ((mot_drive_code[7:6] == 2'b10) ? 1'b1 : 1'b0) & !mot_allstop;
-      MTOP[3] <= ((mot_drive_code[7:6] == 2'b01) ? 1'b1 : 1'b0) & !mot_allstop;
-   end
-   
+/*
    // servo channels
    wire [3:0] m_servo_out;
    servo_pwm servo0_chan (.clk(clk),
@@ -333,7 +279,7 @@ module robot_iface(
    assign M_SERVO[1] = !m_servo_out[1];
    assign M_SERVO[2] = !m_servo_out[2];
    assign M_SERVO[3] = !m_servo_out[3];
-
+*/
    
    /////////////////////////////////
    //////////////////////// ADC block
