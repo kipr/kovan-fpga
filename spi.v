@@ -6,16 +6,16 @@ module spi(
 	input		SSEL,
 	input		MOSI,
 	output	MISO,
-	input [1023:0] SPI_REG,
-	output [1023:384] COMMAND_REG);
+	input [687:0] SPI_REG,
+	output [687:384] COMMAND_REG);
 	
 	
 	reg [2:0] SCKr; // SPI Clock
 	reg [2:0] SSELr; // Slave Selec	
 	reg [1:0] MOSIr; // Master-Out Slave-In
 	reg [15:0] SPI_OUTr;
-	reg [1023:0] SPI_REGr = 1024'd0;
-	reg [1023:384] COMMAND_REGr = 40'd0;
+	reg [687:0] SPI_REGr = 688'd0;
+	reg [687:384] COMMAND_REGr = 304'd0;
 	
 	
 	reg [1:0] state = 2'b00;
@@ -42,7 +42,7 @@ module spi(
 		SCKr <= {SCKr[1:0], SPI_CLK};
 		SSELr <= {SSELr[1:0], SSEL};
 		MOSIr <= {MOSIr[0], MOSI};
-		SPI_REGr[1023:0] <= SPI_REG[1023:0];
+		SPI_REGr[687:0] <= SPI_REG[687:0];
 	end
 	
 	
@@ -108,27 +108,6 @@ module spi(
 						10'd40: 	SPI_OUTr <= SPI_REGr[655:640];
 						10'd41: 	SPI_OUTr <= SPI_REGr[671:656];
 						10'd42: 	SPI_OUTr <= SPI_REGr[687:672];
-						10'd43: 	SPI_OUTr <= SPI_REGr[703:688];
-						10'd44: 	SPI_OUTr <= SPI_REGr[719:704];
-						10'd45: 	SPI_OUTr <= SPI_REGr[735:720];
-						10'd46: 	SPI_OUTr <= SPI_REGr[751:736];
-						10'd47: 	SPI_OUTr <= SPI_REGr[767:752];
-						10'd48: 	SPI_OUTr <= SPI_REGr[783:768];
-						10'd49: 	SPI_OUTr <= SPI_REGr[799:784];
-						10'd50: 	SPI_OUTr <= SPI_REGr[815:800];
-						10'd51: 	SPI_OUTr <= SPI_REGr[831:816];
-						10'd52: 	SPI_OUTr <= SPI_REGr[847:832];
-						10'd53: 	SPI_OUTr <= SPI_REGr[863:848];
-						10'd54: 	SPI_OUTr <= SPI_REGr[879:864];
-						10'd55: 	SPI_OUTr <= SPI_REGr[895:880];
-						10'd56: 	SPI_OUTr <= SPI_REGr[911:896];
-						10'd57: 	SPI_OUTr <= SPI_REGr[927:912];
-						10'd58: 	SPI_OUTr <= SPI_REGr[943:928];
-						10'd59: 	SPI_OUTr <= SPI_REGr[959:944];
-						10'd60: 	SPI_OUTr <= SPI_REGr[975:960];
-						10'd61: 	SPI_OUTr <= SPI_REGr[991:976];
-						10'd62: 	SPI_OUTr <= SPI_REGr[1007:992];
-						10'd63: 	SPI_OUTr <= SPI_REGr[1023:1008];
 						default: SPI_OUTr[15:0] <= SPI_REGr[15:0];
 					endcase
 					
@@ -149,47 +128,26 @@ module spi(
 					SPI_OUTr[15:0] <= byte_data_received[15:0];//echo back the value
 					
 					case(address)
-						10'd24: 	COMMAND_REGr <= {SPI_REGr[1023:400], byte_data_received};
-						10'd25: 	COMMAND_REGr <= {SPI_REGr[1023:416], byte_data_received, SPI_REGr[399:384]};
-						10'd26: 	COMMAND_REGr <= {SPI_REGr[1023:432], byte_data_received, SPI_REGr[415:384]};
-						10'd27: 	COMMAND_REGr <= {SPI_REGr[1023:448], byte_data_received, SPI_REGr[431:384]};
-						10'd28: 	COMMAND_REGr <= {SPI_REGr[1023:464], byte_data_received, SPI_REGr[447:384]};
-						10'd29: 	COMMAND_REGr <= {SPI_REGr[1023:480], byte_data_received, SPI_REGr[463:384]};
-						10'd30: 	COMMAND_REGr <= {SPI_REGr[1023:496], byte_data_received, SPI_REGr[479:384]};
-						10'd31: 	COMMAND_REGr <= {SPI_REGr[1023:512], byte_data_received, SPI_REGr[495:384]};
-						10'd32: 	COMMAND_REGr <= {SPI_REGr[1023:528], byte_data_received, SPI_REGr[511:384]};
-						10'd33: 	COMMAND_REGr <= {SPI_REGr[1023:544], byte_data_received, SPI_REGr[527:384]};
-						10'd34: 	COMMAND_REGr <= {SPI_REGr[1023:560], byte_data_received, SPI_REGr[543:384]};
-						10'd35: 	COMMAND_REGr <= {SPI_REGr[1023:576], byte_data_received, SPI_REGr[559:384]};
-						10'd36: 	COMMAND_REGr <= {SPI_REGr[1023:592], byte_data_received, SPI_REGr[575:384]};
-						10'd37: 	COMMAND_REGr <= {SPI_REGr[1023:608], byte_data_received, SPI_REGr[591:384]};
-						10'd38: 	COMMAND_REGr <= {SPI_REGr[1023:624], byte_data_received, SPI_REGr[607:384]};
-						10'd39: 	COMMAND_REGr <= {SPI_REGr[1023:640], byte_data_received, SPI_REGr[623:384]};
-						10'd40: 	COMMAND_REGr <= {SPI_REGr[1023:656], byte_data_received, SPI_REGr[639:384]};
-						10'd41: 	COMMAND_REGr <= {SPI_REGr[1023:672], byte_data_received, SPI_REGr[655:384]};
-						10'd42: 	COMMAND_REGr <= {SPI_REGr[1023:688], byte_data_received, SPI_REGr[671:384]};
-						10'd43: 	COMMAND_REGr <= {SPI_REGr[1023:704], byte_data_received, SPI_REGr[687:384]};
-						10'd44: 	COMMAND_REGr <= {SPI_REGr[1023:720], byte_data_received, SPI_REGr[703:384]};
-						10'd45: 	COMMAND_REGr <= {SPI_REGr[1023:736], byte_data_received, SPI_REGr[719:384]};
-						10'd46: 	COMMAND_REGr <= {SPI_REGr[1023:752], byte_data_received, SPI_REGr[735:384]};
-						10'd47: 	COMMAND_REGr <= {SPI_REGr[1023:768], byte_data_received, SPI_REGr[751:384]};
-						10'd48: 	COMMAND_REGr <= {SPI_REGr[1023:784], byte_data_received, SPI_REGr[767:384]};
-						10'd49: 	COMMAND_REGr <= {SPI_REGr[1023:800], byte_data_received, SPI_REGr[783:384]};
-						10'd50: 	COMMAND_REGr <= {SPI_REGr[1023:816], byte_data_received, SPI_REGr[799:384]};
-						10'd51: 	COMMAND_REGr <= {SPI_REGr[1023:832], byte_data_received, SPI_REGr[815:384]};
-						10'd52: 	COMMAND_REGr <= {SPI_REGr[1023:848], byte_data_received, SPI_REGr[831:384]};
-						10'd53: 	COMMAND_REGr <= {SPI_REGr[1023:864], byte_data_received, SPI_REGr[847:384]};
-						10'd54: 	COMMAND_REGr <= {SPI_REGr[1023:880], byte_data_received, SPI_REGr[863:384]};
-						10'd55: 	COMMAND_REGr <= {SPI_REGr[1023:896], byte_data_received, SPI_REGr[879:384]};
-						10'd56: 	COMMAND_REGr <= {SPI_REGr[1023:912], byte_data_received, SPI_REGr[895:384]};
-						10'd57: 	COMMAND_REGr <= {SPI_REGr[1023:928], byte_data_received, SPI_REGr[911:384]};
-						10'd58: 	COMMAND_REGr <= {SPI_REGr[1023:944], byte_data_received, SPI_REGr[927:384]};
-						10'd59: 	COMMAND_REGr <= {SPI_REGr[1023:960], byte_data_received, SPI_REGr[943:384]};
-						10'd60: 	COMMAND_REGr <= {SPI_REGr[1023:976], byte_data_received, SPI_REGr[959:384]};
-						10'd61: 	COMMAND_REGr <= {SPI_REGr[1023:992], byte_data_received, SPI_REGr[975:384]};
-						10'd62: 	COMMAND_REGr <= {SPI_REGr[1023:1008], byte_data_received, SPI_REGr[991:384]};
-						10'd63: 	COMMAND_REGr <= {byte_data_received, SPI_REGr[1007:384]};
-						default: COMMAND_REGr[1023:384] <= {SPI_REGr[1023:384]}; // no change
+						10'd24: 	COMMAND_REGr <= {SPI_REGr[687:400], byte_data_received};
+						10'd25: 	COMMAND_REGr <= {SPI_REGr[687:416], byte_data_received, SPI_REGr[399:384]};
+						10'd26: 	COMMAND_REGr <= {SPI_REGr[687:432], byte_data_received, SPI_REGr[415:384]};
+						10'd27: 	COMMAND_REGr <= {SPI_REGr[687:448], byte_data_received, SPI_REGr[431:384]};
+						10'd28: 	COMMAND_REGr <= {SPI_REGr[687:464], byte_data_received, SPI_REGr[447:384]};
+						10'd29: 	COMMAND_REGr <= {SPI_REGr[687:480], byte_data_received, SPI_REGr[463:384]};
+						10'd30: 	COMMAND_REGr <= {SPI_REGr[687:496], byte_data_received, SPI_REGr[479:384]};
+						10'd31: 	COMMAND_REGr <= {SPI_REGr[687:512], byte_data_received, SPI_REGr[495:384]};
+						10'd32: 	COMMAND_REGr <= {SPI_REGr[687:528], byte_data_received, SPI_REGr[511:384]};
+						10'd33: 	COMMAND_REGr <= {SPI_REGr[687:544], byte_data_received, SPI_REGr[527:384]};
+						10'd34: 	COMMAND_REGr <= {SPI_REGr[687:560], byte_data_received, SPI_REGr[543:384]};
+						10'd35: 	COMMAND_REGr <= {SPI_REGr[687:576], byte_data_received, SPI_REGr[559:384]};
+						10'd36: 	COMMAND_REGr <= {SPI_REGr[687:592], byte_data_received, SPI_REGr[575:384]};
+						10'd37: 	COMMAND_REGr <= {SPI_REGr[687:608], byte_data_received, SPI_REGr[591:384]};
+						10'd38: 	COMMAND_REGr <= {SPI_REGr[687:624], byte_data_received, SPI_REGr[607:384]};
+						10'd39: 	COMMAND_REGr <= {SPI_REGr[687:640], byte_data_received, SPI_REGr[623:384]};
+						10'd40: 	COMMAND_REGr <= {SPI_REGr[687:656], byte_data_received, SPI_REGr[639:384]};
+						10'd41: 	COMMAND_REGr <= {SPI_REGr[687:672], byte_data_received, SPI_REGr[655:384]};
+						10'd42: 	COMMAND_REGr <= {byte_data_received, SPI_REGr[671:384]};
+						default: COMMAND_REGr[687:384] <= {SPI_REGr[687:384]}; // no change
 					endcase
 					
 				end
