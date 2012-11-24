@@ -94,7 +94,7 @@ module kovan (
 	input wire [5:0]  LCD_R,
 	input wire        LCD_DEN,
 	input wire        LCD_HS,
-	input wire [5:0]  LCD_SUPP,
+	//input wire [5:0]  LCD_SUPP,
 	input wire        LCD_VS,
 	output wire       LCD_CLK_T,  // clock is sourced from the FPGA
 
@@ -110,6 +110,8 @@ module kovan (
 
 	// LED
 	output wire       FPGA_LED,
+	
+	output wire			ADC_BATT_SEL,
 
 	input wire       OSC_CLK   // 26 mhz clock from CPU
 	);
@@ -166,6 +168,7 @@ module kovan (
 			  .clk(clk_qvga),
 			  .glbl_reset(glbl_reset || !qvga_clkgen_locked),
 			  .reset(lcd_reset) );
+			  
    always @(posedge clk_qvga) begin
       // TODO: assign timing constraints to ensure hold times met for LCD
       lcd_pipe_b[5:0] <= LCD_B[5:0];
@@ -176,6 +179,9 @@ module kovan (
       lcd_pipe_vsync <= LCD_VS;
       lcd_reset_n <= !lcd_reset;
    end
+	
+	reg adc_batt_sel_r = 0;
+	assign ADC_BATT_SEL = adc_batt_sel_r;
 	
    assign LCDO_B[7:3] = lcd_pipe_b[5:1];
    assign LCDO_G[7:2] = lcd_pipe_g[5:0];
@@ -272,7 +278,7 @@ module kovan (
 	
 		// pipeline this (takes too long)
 		dig_out_val_r <= SPI_REG[471:464];	// r29
-		
+		adc_batt_sel_r <= SPI_REG[660];
 	end	
 		
 		

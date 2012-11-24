@@ -50,13 +50,6 @@ module robot_iface(
 	     input wire       adc_go,  
 
 
-	     // servo interface
-	     //input wire [23:0] servo_pwm_period, // total period for the servo update
-	     //input wire [23:0] servo0_pwm_pulse, // pulse width in absolute time
-	     //input wire [23:0] servo1_pwm_pulse,
-	     //input wire [23:0] servo2_pwm_pulse,
-	     //input wire [23:0] servo3_pwm_pulse,
-
 	     /////// physical interfaces to outside the chip
 	     //output wire [3:0] M_SERVO,
 
@@ -250,38 +243,6 @@ module robot_iface(
 
    
    /////////////////////////////////
-   //////////////////////// PWM block
-   /////////////////////////////////
-/*
-   // servo channels
-   wire [3:0] m_servo_out;
-   servo_pwm servo0_chan (.clk(clk),
-			  .period(servo_pwm_period),
-			  .pulse(servo0_pwm_pulse),
-			  .pwm_output(m_servo_out[0]));
-
-   servo_pwm servo1_chan (.clk(clk),
-			  .period(servo_pwm_period),
-			  .pulse(servo1_pwm_pulse),
-			  .pwm_output(m_servo_out[1]));
-
-   servo_pwm servo2_chan (.clk(clk),
-			  .period(servo_pwm_period),
-			  .pulse(servo2_pwm_pulse),
-			  .pwm_output(m_servo_out[2]));
-
-   servo_pwm servo3_chan (.clk(clk),
-			  .period(servo_pwm_period),
-			  .pulse(servo3_pwm_pulse),
-			  .pwm_output(m_servo_out[3]));
-
-   assign M_SERVO[0] = !m_servo_out[0]; // invert to compensate inverting level converters
-   assign M_SERVO[1] = !m_servo_out[1];
-   assign M_SERVO[2] = !m_servo_out[2];
-   assign M_SERVO[3] = !m_servo_out[3];
-*/
-   
-   /////////////////////////////////
    //////////////////////// ADC block
    /////////////////////////////////
    parameter ADC_INIT           =   5'b1 << 0;
@@ -367,7 +328,7 @@ module robot_iface(
 //	   adc_shift_out <= {11'b0,adc_chan[0],adc_chan[1],adc_chan[2],2'b0};
 	   adc_shift_out <= {2'b0,adc_chan[2],adc_chan[1],adc_chan[0],11'b0};
 	   adc_shift_in <= adc_shift_in;
-	   adc_cs <= adc_chan[3] ? 2'b01 : 2'b10;
+	   adc_cs <= adc_chan[3] ? 2'b10 : 2'b01;
 	   
 	   adc_valid <= 0;
 	   adc_in <= adc_in;
