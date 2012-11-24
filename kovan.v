@@ -259,44 +259,121 @@ module kovan (
 	// reg 68 digital output vals
 	reg [7:0] dig_out_val_r = 8'h00;
 
-	always @(posedge clk26buf) begin
+   reg [9:0] adc_0_in = 10'd0;
+   reg [9:0] adc_1_in = 10'd0;
+   reg [9:0] adc_2_in = 10'd0;
+   reg [9:0] adc_3_in = 10'd0;
+   reg [9:0] adc_4_in = 10'd0;
+   reg [9:0] adc_5_in = 10'd0;
+   reg [9:0] adc_6_in = 10'd0;
+   reg [9:0] adc_7_in = 10'd0;
+   reg [9:0] adc_8_in = 10'd0;
+   reg [9:0] adc_9_in = 10'd0;
+   reg [9:0] adc_10_in = 10'd0;
+   reg [9:0] adc_11_in = 10'd0;
+   reg [9:0] adc_12_in = 10'd0;
+   reg [9:0] adc_13_in = 10'd0;
+   reg [9:0] adc_14_in = 10'd0;
+   reg [9:0] adc_15_in = 10'd0;
+   reg [9:0] adc_16_in = 10'd0;
 	
+	reg [9:0] adc_8_in_p = 10'd0;
+	
+	reg [1:0] auto_adc_state = 2'b00;
+
+
+	reg [11:0] mot_duty0_r = 12'd0;
+	reg [11:0] mot_duty1_r = 12'd0;
+	reg [11:0] mot_duty2_r = 12'd0;
+	reg [11:0] mot_duty3_r = 12'd0;
+
+	
+	reg [23:0] servo_pwm0_r = 24'd0;
+	reg [23:0] servo_pwm1_r = 24'd0;
+	reg [23:0] servo_pwm2_r = 24'd0;
+	reg [23:0] servo_pwm3_r = 24'd0;
+	
+	assign mot_duty0 = mot_duty0_r;
+	assign mot_duty1 = mot_duty1_r;
+	assign mot_duty2 = mot_duty2_r;
+	assign mot_duty3 = mot_duty3_r;
+
+	assign servo0_pwm_pulse = servo_pwm0_r;
+	assign servo1_pwm_pulse = servo_pwm1_r;
+	assign servo2_pwm_pulse = servo_pwm2_r;
+	assign servo3_pwm_pulse = servo_pwm3_r;
+
+	
+	
+	always @(posedge clk208M) begin
+
 		// sorry, I know.... 
 		// if only we had good 2d support
+		
+		//adc_0_in <= adc_in;
+		adc_8_in_p[9:0] <= adc_8_in[9:0];
 		
 		//	READ Only
 		SPI_REG[15:0] <= 16'h4A53;						// r00
 		SPI_REG[31:16] <= {8'h00, dig_out_val};	// r01
-		SPI_REG[47:32] <= {6'h00, adc_in};			// r02
 		
-		SPI_REG[303:288] <= {15'h00, adc_valid};	// r18
-		SPI_REG[319:304] <= {15'h00, dig_val_good};	// r19
-		SPI_REG[335:320] <= {15'h00, dig_busy};	// r20
-	
-	
+		SPI_REG[41:32] <= adc_0_in[9:0];			// r02
+		SPI_REG[57:48] <= adc_1_in[9:0];			// r03
+		SPI_REG[73:64] <= adc_2_in[9:0];			// r04
+		SPI_REG[89:80] <= adc_3_in[9:0];			// r05
+		SPI_REG[105:96] <= adc_4_in[9:0];			// r06
+		SPI_REG[121:112] <= adc_5_in[9:0];			// r07
+		SPI_REG[137:128] <= adc_6_in[9:0];			// r08
+		SPI_REG[153:144]<= adc_7_in[9:0];			// r08
+		
+		SPI_REG[169:160] <= adc_8_in_p[9:0];			// r09
+		SPI_REG[185:176] <= adc_9_in[9:0];			// r10
+		SPI_REG[201:192] <= adc_10_in[9:0];			// r11
+		SPI_REG[217:208] <= adc_11_in[9:0];			// r12
+		SPI_REG[233:224] <= adc_12_in[9:0];			// r13
+		SPI_REG[249:240] <= adc_13_in[9:0];			// r14
+		SPI_REG[265:256] <= adc_14_in[9:0];			// r15
+		SPI_REG[281:272] <= adc_15_in[9:0];			// r16
+		SPI_REG[297:288] <= adc_16_in[9:0];			// r17
+		
 		SPI_REG[687:384] <= {COMMAND_REG[687:542], 1'b0, COMMAND_REG[540:400], 16'h6677};//COMMAND_REG[1023:384];
 	
 		// pipeline this (takes too long)
 		dig_out_val_r <= SPI_REG[471:464];	// r29
-		adc_batt_sel_r <= SPI_REG[660];
+		//adc_batt_sel_r <= SPI_REG[660];
 	end	
 		
-		
+	
+
+	always @(posedge clk208M) begin
+
+		//servo_pwm0_r[23:8] <= SPI_REG[415:400];	// r25
+		//servo_pwm1_r[23:8] <= SPI_REG[431:416];	// r26
+		//servo_pwm2_r[23:8] <= SPI_REG[447:432];	// r27
+		//servo_pwm3_r[23:8] <= SPI_REG[463:448];	// r28
+	end
+
+
+	always @(posedge clk26buf) begin
+		//mot_duty0_r[11:0] <= SPI_REG[539:528];			// r33
+		//mot_duty1_r[11:0] <= SPI_REG[555:544];			// r34
+		//mot_duty2_r[11:0] <= SPI_REG[571:560];			// r35
+		//mot_duty3_r[11:0] <= SPI_REG[587:576];			// r36	
+	end
+
+	
 	// READ/WRITE
-	assign servo0_pwm_pulse[23:0] = {SPI_REG[415:400], 8'h00};	// r25
-	assign servo1_pwm_pulse[23:0] = {SPI_REG[431:416], 8'h00};	// r26
-	assign servo2_pwm_pulse[23:0] = {SPI_REG[447:432], 8'h00};	// r27
-	assign servo3_pwm_pulse[23:0] = {SPI_REG[463:448], 8'h00};	// r28
+	//assign servo0_pwm_pulse[23:0] = {SPI_REG[415:400], 8'h00};	// r25
+	//assign servo1_pwm_pulse[23:0] = {SPI_REG[431:416], 8'h00};	// r26
+	//assign servo2_pwm_pulse[23:0] = {SPI_REG[447:432], 8'h00};	// r27
+	//assign servo3_pwm_pulse[23:0] = {SPI_REG[463:448], 8'h00};	// r28
 
 
-	assign dig_out_val[7:0] = dig_out_val_r[7:0];   	// pipeline
-	assign dig_pu[7:0] = SPI_REG[487:480];					// r30
-	assign dig_oe[7:0] = SPI_REG[503:496];					// r31
+//	assign dig_out_val[7:0] = dig_out_val_r[7:0];   	// pipeline
+//	assign dig_pu[7:0] = SPI_REG[487:480];					// r30
+//	assign dig_oe[7:0] = SPI_REG[503:496];					// r31
 	assign ana_pu[7:0] = SPI_REG[519:512];					// r32
-	assign mot_duty0[11:0] = SPI_REG[539:528];			// r33
-	assign mot_duty1[11:0] = SPI_REG[555:544];			// r34
-	assign mot_duty2[11:0] = SPI_REG[571:560];			// r35
-	assign mot_duty3[11:0] = SPI_REG[587:576];			// r36
+
 
 	assign servo_pwm_period[23:0] =  24'h03F7A0;
 	
@@ -304,8 +381,100 @@ module kovan (
 	assign dig_update = SPI_REG[608];// r38				
 	assign mot_drive_code[7:0] = SPI_REG[631:624];	// r39
 	assign mot_allstop = SPI_REG[640];	// r40
-	assign adc_chan[3:0] = SPI_REG[659:656];	// r41
-	assign adc_go = SPI_REG[672];	// r42
+
+	reg [6:0] adc_chan_r = 7'd0;
+	reg adc_go_r = 0;
+
+	assign adc_chan[3:0] = adc_chan_r[5:2];//assign adc_chan[3:0] = SPI_REG[659:656];	// r41
+	assign adc_go = adc_go_r;//assign adc_go = SPI_REG[672];	// r42
+	reg [15:0] adc_timeout = 16'd0;
+
+	// adc auto update
+	always @(posedge clk3p2M) begin
+	
+		
+		case(auto_adc_state) 
+			2'b00: begin
+				adc_batt_sel_r <= adc_chan_r[6];
+				adc_go_r <= 0;
+				adc_chan_r <= adc_chan_r;
+				auto_adc_state <= auto_adc_state + 2'b01;
+			end
+			
+			2'b01: begin
+				adc_go_r <= 1;
+				adc_chan_r <= adc_chan_r;
+				auto_adc_state <= auto_adc_state + 2'b01;
+			end
+			
+			2'b10: begin
+				adc_go_r <= 0;
+				adc_chan_r <= adc_chan_r;
+				auto_adc_state <= auto_adc_state + 2'b01;
+				adc_timeout <= 16'd0;
+			end
+			
+			2'b11: begin
+				// waiting for adc_valid
+				if (adc_timeout > 16'hfff0) begin
+					adc_go_r <= 0;
+					adc_chan_r <= adc_chan_r;
+					adc_timeout <= 16'h0000;
+					auto_adc_state <= 2'b00;
+				end else begin
+					adc_timeout <= adc_timeout + 16'h0001;
+					adc_go_r <= 0;
+					if (adc_valid) begin
+
+						case (adc_chan_r[6:2]) 
+							5'd0: adc_0_in <= adc_in;
+							5'd1: adc_1_in <= adc_in;
+							5'd2: adc_2_in <= adc_in;
+							5'd3: adc_3_in <= adc_in;
+							5'd4: adc_4_in <= adc_in;
+							5'd5: adc_5_in <= adc_in;
+							5'd6: adc_6_in <= adc_in;
+							5'd7: adc_7_in <= adc_in;
+							5'd8: adc_8_in <= adc_in;
+							5'd9: adc_9_in <= adc_in;
+							5'd10: adc_10_in <= adc_in;
+							5'd11: adc_11_in <= adc_in;
+							5'd12: adc_12_in <= adc_in;
+							5'd13: adc_13_in <= adc_in;
+							5'd14: adc_14_in <= adc_in;
+							5'd15: adc_15_in <= adc_in;
+							5'd16: adc_16_in <= adc_in;
+							default:;
+						endcase
+					
+						// back to start state
+						auto_adc_state <= 2'b00;
+						
+						// next channel to be sampled
+						if (adc_chan_r[6:2] < 17)  begin
+							adc_chan_r <= adc_chan_r + 7'd1;
+						end else begin
+							adc_chan_r <= 7'd0;
+						end
+
+					end else begin
+						//stay in state
+						auto_adc_state <= 2'b11; 
+						adc_chan_r <= adc_chan_r;
+					end
+				end // adc no time out
+			end // case 11
+			
+			default: begin
+				auto_adc_state <= 0;
+				adc_go_r <= 0;
+			end
+		endcase
+	
+
+	end
+	
+	
 
 		
 	spi pxa_spi (
