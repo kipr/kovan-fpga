@@ -44,8 +44,8 @@ module quad_motor(
 	reg [3:0] MTOP_r = 4'b0000;
 	reg [11:0] count = 12'h0000;
 	
-	assign MBOT[3:0] = MBOT_r[3:0];
-	assign MTOP[3:0] = MTOP_r[3:0];
+	assign MBOT[3:0] = MTOP_r[3:0];
+	assign MTOP[3:0] = MBOT_r[3:0];
 	
 	reg pwm_r;
 	assign pwm = pwm_r;

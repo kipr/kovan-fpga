@@ -294,7 +294,7 @@ module kovan (
 		SPI_REG[15:0] <= 16'h4A53;				
 		SPI_REG[687:16] <= SPI_REG_p[687:16];
 
-		SPI_REG_p[31:16] <= {8'h00, dig_out_val};	// r01
+		SPI_REG_p[31:16] <= {8'h00, dig_in_val};	// r01
 		SPI_REG_p[41:32]   <= adc_0_in[9:0];			// r02
 		SPI_REG_p[57:48]   <= adc_1_in[9:0];			// r03
 		SPI_REG_p[73:64]   <= adc_2_in[9:0];			// r04
