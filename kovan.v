@@ -243,6 +243,7 @@ module kovan (
 	
 	//assign FPGA_MISO = FPGA_MOSI; // loopback testing
 	reg [687:0] SPI_REG = 688'd0;
+	reg [687:0] SPI_REG_p = 688'd0;
 	wire [687:384] COMMAND_REG;
 	// DATA_REG (read only)
 	// SPI_REG[63:0]
@@ -309,69 +310,58 @@ module kovan (
 
 		// sorry, I know.... 
 		// if only we had good 2d support
+
+		SPI_REG[15:0] <= 16'h4A53;				
+		SPI_REG[687:16] <= SPI_REG_p[687:16];
 		
-		//adc_0_in <= adc_in;
-		adc_8_in_p[9:0] <= adc_8_in[9:0];
+		//	READ Only		// r00
+		SPI_REG_p[31:16] <= {8'h00, dig_out_val};	// r01
 		
-		//	READ Only
-		SPI_REG[15:0] <= 16'h4A53;						// r00
-		SPI_REG[31:16] <= {8'h00, dig_out_val};	// r01
+		SPI_REG_p[41:32]   <= adc_0_in[9:0];			// r02
+		SPI_REG_p[57:48]   <= adc_1_in[9:0];			// r03
+		SPI_REG_p[73:64]   <= adc_2_in[9:0];			// r04
+		SPI_REG_p[89:80]   <= adc_3_in[9:0];			// r05
+		SPI_REG_p[105:96]  <= adc_4_in[9:0];			// r06
+		SPI_REG_p[121:112] <= adc_5_in[9:0];			// r07
+		SPI_REG_p[137:128] <= adc_6_in[9:0];			// r08
+		SPI_REG_p[153:144] <= adc_7_in[9:0];			// r09
+		SPI_REG_p[169:160] <= adc_8_in[9:0];			// r10
+		SPI_REG_p[185:176] <= adc_9_in[9:0];			// r11
+		SPI_REG_p[201:192] <= adc_10_in[9:0];			// r12
+		SPI_REG_p[217:208] <= adc_11_in[9:0];			// r13
+		SPI_REG_p[233:224] <= adc_12_in[9:0];			// r14
+		SPI_REG_p[249:240] <= adc_13_in[9:0];			// r15
+		SPI_REG_p[265:256] <= adc_14_in[9:0];			// r16
+		SPI_REG_p[281:272] <= adc_15_in[9:0];			// r17
+		SPI_REG_p[297:288] <= adc_16_in[9:0];			// r18
 		
-		SPI_REG[41:32] <= adc_0_in[9:0];			// r02
-		SPI_REG[57:48] <= adc_1_in[9:0];			// r03
-		SPI_REG[73:64] <= adc_2_in[9:0];			// r04
-		SPI_REG[89:80] <= adc_3_in[9:0];			// r05
-		SPI_REG[105:96] <= adc_4_in[9:0];			// r06
-		SPI_REG[121:112] <= adc_5_in[9:0];			// r07
-		SPI_REG[137:128] <= adc_6_in[9:0];			// r08
-		SPI_REG[153:144]<= adc_7_in[9:0];			// r08
-		
-		SPI_REG[169:160] <= adc_8_in_p[9:0];			// r09
-		SPI_REG[185:176] <= adc_9_in[9:0];			// r10
-		SPI_REG[201:192] <= adc_10_in[9:0];			// r11
-		SPI_REG[217:208] <= adc_11_in[9:0];			// r12
-		SPI_REG[233:224] <= adc_12_in[9:0];			// r13
-		SPI_REG[249:240] <= adc_13_in[9:0];			// r14
-		SPI_REG[265:256] <= adc_14_in[9:0];			// r15
-		SPI_REG[281:272] <= adc_15_in[9:0];			// r16
-		SPI_REG[297:288] <= adc_16_in[9:0];			// r17
-		
-		SPI_REG[687:384] <= {COMMAND_REG[687:542], 1'b0, COMMAND_REG[540:400], 16'h6677};//COMMAND_REG[1023:384];
-	
+		SPI_REG_p[687:384] <= {COMMAND_REG[687:542], 1'b0, COMMAND_REG[540:400], 16'h6677};//COMMAND_REG[1023:384];
+
 		// pipeline this (takes too long)
 		dig_out_val_r <= SPI_REG[471:464];	// r29
-		//adc_batt_sel_r <= SPI_REG[660];
+
+		servo_pwm0_r[23:8] <= SPI_REG[415:400];	// r25
+		servo_pwm1_r[23:8] <= SPI_REG[431:416];	// r26
+		servo_pwm2_r[23:8] <= SPI_REG[447:432];	// r27
+		servo_pwm3_r[23:8] <= SPI_REG[463:448];	// r28
 	end	
 		
 	
 
-	always @(posedge clk208M) begin
-
-		//servo_pwm0_r[23:8] <= SPI_REG[415:400];	// r25
-		//servo_pwm1_r[23:8] <= SPI_REG[431:416];	// r26
-		//servo_pwm2_r[23:8] <= SPI_REG[447:432];	// r27
-		//servo_pwm3_r[23:8] <= SPI_REG[463:448];	// r28
-	end
-
-
 	always @(posedge clk26buf) begin
-		//mot_duty0_r[11:0] <= SPI_REG[539:528];			// r33
-		//mot_duty1_r[11:0] <= SPI_REG[555:544];			// r34
-		//mot_duty2_r[11:0] <= SPI_REG[571:560];			// r35
-		//mot_duty3_r[11:0] <= SPI_REG[587:576];			// r36	
+
+		mot_duty0_r[11:0] <= SPI_REG[539:528];			// r33
+		mot_duty1_r[11:0] <= SPI_REG[555:544];			// r34
+		mot_duty2_r[11:0] <= SPI_REG[571:560];			// r35
+		mot_duty3_r[11:0] <= SPI_REG[587:576];			// r36	
+
 	end
 
-	
-	// READ/WRITE
-	//assign servo0_pwm_pulse[23:0] = {SPI_REG[415:400], 8'h00};	// r25
-	//assign servo1_pwm_pulse[23:0] = {SPI_REG[431:416], 8'h00};	// r26
-	//assign servo2_pwm_pulse[23:0] = {SPI_REG[447:432], 8'h00};	// r27
-	//assign servo3_pwm_pulse[23:0] = {SPI_REG[463:448], 8'h00};	// r28
 
 
-//	assign dig_out_val[7:0] = dig_out_val_r[7:0];   	// pipeline
-//	assign dig_pu[7:0] = SPI_REG[487:480];					// r30
-//	assign dig_oe[7:0] = SPI_REG[503:496];					// r31
+	assign dig_out_val[7:0] = dig_out_val_r[7:0];   	// pipeline
+	assign dig_pu[7:0] = SPI_REG[487:480];					// r30
+	assign dig_oe[7:0] = SPI_REG[503:496];					// r31
 	assign ana_pu[7:0] = SPI_REG[519:512];					// r32
 
 
@@ -510,28 +500,28 @@ module kovan (
 	end
 	
    servo_pwm servo0_chan (
-		.clk(clk),
+		.clk(clk13buf),
 		.period(servo_pwm_period),
 		.pulse(servo0_pwm_pulse),
 		.pwm_output(m_servo_out_r[0])
 	);
 
    servo_pwm servo1_chan (
-		.clk(clk),
+		.clk(clk13buf),
 		.period(servo_pwm_period),
 		.pulse(servo1_pwm_pulse),
 		.pwm_output(m_servo_out_r[1])
 	);
 
    servo_pwm servo2_chan (
-		.clk(clk),
+		.clk(clk13buf),
 		.period(servo_pwm_period),
 		.pulse(servo2_pwm_pulse),
 		.pwm_output(m_servo_out_r[2])
 	);
 
    servo_pwm servo3_chan (
-		.clk(clk),
+		.clk(clk13buf),
 		.period(servo_pwm_period),
 		.pulse(servo3_pwm_pulse),
 		.pwm_output(m_servo_out_r[3])
