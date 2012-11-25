@@ -180,8 +180,8 @@ module kovan (
       lcd_reset_n <= !lcd_reset;
    end
 	
-	reg adc_batt_sel_r = 0;
-	assign ADC_BATT_SEL = adc_batt_sel_r;
+	//reg adc_batt_sel_r = 0;
+	//assign ADC_BATT_SEL = adc_batt_sel_r;
 	
    assign LCDO_B[7:3] = lcd_pipe_b[5:1];
    assign LCDO_G[7:2] = lcd_pipe_g[5:0];
@@ -222,7 +222,7 @@ module kovan (
    wire       dig_update;
 
    wire [9:0] adc_in;
-   wire [3:0] adc_chan;
+   //wire [3:0] adc_chan;
    wire       adc_valid;
    wire       adc_go;
 
@@ -241,48 +241,35 @@ module kovan (
    wire [23:0] servo3_pwm_pulse;
 	
 	
-	//assign FPGA_MISO = FPGA_MOSI; // loopback testing
-	reg [687:0] SPI_REG = 688'd0;
-	reg [687:0] SPI_REG_p = 688'd0;
+	
+	// neutral servo positions at startup
+	reg [687:0] SPI_REG = {224'd0, 16'd76, 16'd76, 16'd76, 16'd76, 400'd0};
+	reg [687:0] SPI_REG_p = {224'd0, 16'd76, 16'd76, 16'd76, 16'd76, 400'd0};
+	
 	wire [687:384] COMMAND_REG;
-	// DATA_REG (read only)
-	// SPI_REG[63:0]
-	// reg 0 : reserved
-	// reg 16:1  for analog input vals
-	// reg 17 digital input vals
-	//
-	// COMMAND_REG (write only)
-	// SPI_REG[127:64]
-	// reg 64 : reserved
-	// reg 65 digital output enables
-	// reg 66 digital pullups
-	// reg 67 analog pullups
-	// reg 68 digital output vals
+
 	reg [7:0] dig_out_val_r = 8'h00;
 
-   reg [9:0] adc_0_in = 10'd0;
-   reg [9:0] adc_1_in = 10'd0;
-   reg [9:0] adc_2_in = 10'd0;
-   reg [9:0] adc_3_in = 10'd0;
-   reg [9:0] adc_4_in = 10'd0;
-   reg [9:0] adc_5_in = 10'd0;
-   reg [9:0] adc_6_in = 10'd0;
-   reg [9:0] adc_7_in = 10'd0;
-   reg [9:0] adc_8_in = 10'd0;
-   reg [9:0] adc_9_in = 10'd0;
-   reg [9:0] adc_10_in = 10'd0;
-   reg [9:0] adc_11_in = 10'd0;
-   reg [9:0] adc_12_in = 10'd0;
-   reg [9:0] adc_13_in = 10'd0;
-   reg [9:0] adc_14_in = 10'd0;
-   reg [9:0] adc_15_in = 10'd0;
-   reg [9:0] adc_16_in = 10'd0;
-	
-	reg [9:0] adc_8_in_p = 10'd0;
-	
-	reg [1:0] auto_adc_state = 2'b00;
 
+   wire [9:0] adc_0_in;
+   wire [9:0] adc_1_in;
+   wire [9:0] adc_2_in;
+   wire [9:0] adc_3_in;
+   wire [9:0] adc_4_in;
+   wire [9:0] adc_5_in;
+   wire [9:0] adc_6_in;
+   wire [9:0] adc_7_in;
+   wire [9:0] adc_8_in;
+   wire [9:0] adc_9_in;
+   wire [9:0] adc_10_in;
+   wire [9:0] adc_11_in;
+   wire [9:0] adc_12_in;
+   wire [9:0] adc_13_in;
+   wire [9:0] adc_14_in;
+   wire [9:0] adc_15_in;
+   wire [9:0] adc_16_in;
 
+	
 	reg [11:0] mot_duty0_r = 12'd0;
 	reg [11:0] mot_duty1_r = 12'd0;
 	reg [11:0] mot_duty2_r = 12'd0;
@@ -371,101 +358,9 @@ module kovan (
 	assign dig_update = SPI_REG[608];// r38				
 	assign mot_drive_code[7:0] = SPI_REG[631:624];	// r39
 	assign mot_allstop = SPI_REG[640];	// r40
-
-	reg [6:0] adc_chan_r = 7'd0;
-	reg adc_go_r = 0;
-
-	assign adc_chan[3:0] = adc_chan_r[5:2];//assign adc_chan[3:0] = SPI_REG[659:656];	// r41
-	assign adc_go = adc_go_r;//assign adc_go = SPI_REG[672];	// r42
-	reg [15:0] adc_timeout = 16'd0;
-
-	// adc auto update
-	always @(posedge clk3p2M) begin
-	
-		
-		case(auto_adc_state) 
-			2'b00: begin
-				adc_batt_sel_r <= adc_chan_r[6];
-				adc_go_r <= 0;
-				adc_chan_r <= adc_chan_r;
-				auto_adc_state <= auto_adc_state + 2'b01;
-			end
-			
-			2'b01: begin
-				adc_go_r <= 1;
-				adc_chan_r <= adc_chan_r;
-				auto_adc_state <= auto_adc_state + 2'b01;
-			end
-			
-			2'b10: begin
-				adc_go_r <= 0;
-				adc_chan_r <= adc_chan_r;
-				auto_adc_state <= auto_adc_state + 2'b01;
-				adc_timeout <= 16'd0;
-			end
-			
-			2'b11: begin
-				// waiting for adc_valid
-				if (adc_timeout > 16'hfff0) begin
-					adc_go_r <= 0;
-					adc_chan_r <= adc_chan_r;
-					adc_timeout <= 16'h0000;
-					auto_adc_state <= 2'b00;
-				end else begin
-					adc_timeout <= adc_timeout + 16'h0001;
-					adc_go_r <= 0;
-					if (adc_valid) begin
-
-						case (adc_chan_r[6:2]) 
-							5'd0: adc_0_in <= adc_in;
-							5'd1: adc_1_in <= adc_in;
-							5'd2: adc_2_in <= adc_in;
-							5'd3: adc_3_in <= adc_in;
-							5'd4: adc_4_in <= adc_in;
-							5'd5: adc_5_in <= adc_in;
-							5'd6: adc_6_in <= adc_in;
-							5'd7: adc_7_in <= adc_in;
-							5'd8: adc_8_in <= adc_in;
-							5'd9: adc_9_in <= adc_in;
-							5'd10: adc_10_in <= adc_in;
-							5'd11: adc_11_in <= adc_in;
-							5'd12: adc_12_in <= adc_in;
-							5'd13: adc_13_in <= adc_in;
-							5'd14: adc_14_in <= adc_in;
-							5'd15: adc_15_in <= adc_in;
-							5'd16: adc_16_in <= adc_in;
-							default:;
-						endcase
-					
-						// back to start state
-						auto_adc_state <= 2'b00;
-						
-						// next channel to be sampled
-						if (adc_chan_r[6:2] < 17)  begin
-							adc_chan_r <= adc_chan_r + 7'd1;
-						end else begin
-							adc_chan_r <= 7'd0;
-						end
-
-					end else begin
-						//stay in state
-						auto_adc_state <= 2'b11; 
-						adc_chan_r <= adc_chan_r;
-					end
-				end // adc no time out
-			end // case 11
-			
-			default: begin
-				auto_adc_state <= 0;
-				adc_go_r <= 0;
-			end
-		endcase
-	
-
-	end
 	
 	
-
+	wire [3:0] adc_chan;
 		
 	spi pxa_spi (
 		.SYS_CLK(clk208M), 
@@ -490,6 +385,32 @@ module kovan (
 		.MBOT(MBOT[3:0]),
 		.MTOP(MTOP[3:0])
 	);
+
+	auto_adc_updater adc_updater(
+		.clk3p2M(clk3p2M),
+		.adc_in(adc_in),
+		.adc_valid(adc_valid),
+		.adc_go(adc_go),
+		.adc_chan(adc_chan),
+		.adc_0_in(adc_0_in),
+		.adc_1_in(adc_1_in),
+		.adc_2_in(adc_2_in),
+		.adc_3_in(adc_3_in),
+		.adc_4_in(adc_4_in),
+		.adc_5_in(adc_5_in),
+		.adc_6_in(adc_6_in),
+		.adc_7_in(adc_7_in),
+		.adc_8_in(adc_8_in),
+		.adc_9_in(adc_9_in),
+		.adc_10_in(adc_10_in),
+		.adc_11_in(adc_11_in),
+		.adc_12_in(adc_12_in),
+		.adc_13_in(adc_13_in),
+		.adc_14_in(adc_14_in),
+		.adc_15_in(adc_15_in),
+		.adc_16_in(adc_16_in),
+		.adc_batt_sel(ADC_BATT_SEL)
+    );
 
 
    reg [3:0] m_servo_out;
@@ -532,8 +453,7 @@ module kovan (
    assign M_SERVO[2] = !m_servo_out[2];
    assign M_SERVO[3] = !m_servo_out[3];
 
-
-
+	
    robot_iface iface(
 		.clk(clk13buf), 
 		.glbl_reset(glbl_reset),
