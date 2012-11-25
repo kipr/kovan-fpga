@@ -250,7 +250,6 @@ module kovan (
 
 	reg [7:0] dig_out_val_r = 8'h00;
 
-
    wire [9:0] adc_0_in;
    wire [9:0] adc_1_in;
    wire [9:0] adc_2_in;
@@ -269,12 +268,10 @@ module kovan (
    wire [9:0] adc_15_in;
    wire [9:0] adc_16_in;
 
-	
 	reg [11:0] mot_duty0_r = 12'd0;
 	reg [11:0] mot_duty1_r = 12'd0;
 	reg [11:0] mot_duty2_r = 12'd0;
 	reg [11:0] mot_duty3_r = 12'd0;
-
 	
 	reg [23:0] servo_pwm0_r = 24'd0;
 	reg [23:0] servo_pwm1_r = 24'd0;
@@ -292,18 +289,12 @@ module kovan (
 	assign servo3_pwm_pulse = servo_pwm3_r;
 
 	
-	
 	always @(posedge clk208M) begin
-
-		// sorry, I know.... 
-		// if only we had good 2d support
-
+	
 		SPI_REG[15:0] <= 16'h4A53;				
 		SPI_REG[687:16] <= SPI_REG_p[687:16];
-		
-		//	READ Only		// r00
+
 		SPI_REG_p[31:16] <= {8'h00, dig_out_val};	// r01
-		
 		SPI_REG_p[41:32]   <= adc_0_in[9:0];			// r02
 		SPI_REG_p[57:48]   <= adc_1_in[9:0];			// r03
 		SPI_REG_p[73:64]   <= adc_2_in[9:0];			// r04
@@ -321,22 +312,17 @@ module kovan (
 		SPI_REG_p[265:256] <= adc_14_in[9:0];			// r16
 		SPI_REG_p[281:272] <= adc_15_in[9:0];			// r17
 		SPI_REG_p[297:288] <= adc_16_in[9:0];			// r18
-		
-		SPI_REG_p[687:384] <= {COMMAND_REG[687:542], 1'b0, COMMAND_REG[540:400], 16'h6677};//COMMAND_REG[1023:384];
-
-		// pipeline this (takes too long)
-		dig_out_val_r <= SPI_REG[471:464];	// r29
-
 		servo_pwm0_r[23:8] <= SPI_REG[415:400];	// r25
 		servo_pwm1_r[23:8] <= SPI_REG[431:416];	// r26
 		servo_pwm2_r[23:8] <= SPI_REG[447:432];	// r27
 		servo_pwm3_r[23:8] <= SPI_REG[463:448];	// r28
+		dig_out_val_r <= SPI_REG[471:464];	// r29
+		
+		SPI_REG_p[687:384] <= {COMMAND_REG[687:542], 1'b0, COMMAND_REG[540:400], 16'h6677};//COMMAND_REG[1023:384];
 	end	
 		
 	
-
 	always @(posedge clk26buf) begin
-
 		mot_duty0_r[11:0] <= SPI_REG[539:528];			// r33
 		mot_duty1_r[11:0] <= SPI_REG[555:544];			// r34
 		mot_duty2_r[11:0] <= SPI_REG[571:560];			// r35
@@ -345,20 +331,16 @@ module kovan (
 	end
 
 
-
 	assign dig_out_val[7:0] = dig_out_val_r[7:0];   	// pipeline
 	assign dig_pu[7:0] = SPI_REG[487:480];					// r30
 	assign dig_oe[7:0] = SPI_REG[503:496];					// r31
 	assign ana_pu[7:0] = SPI_REG[519:512];					// r32
-
-
 	assign servo_pwm_period[23:0] =  24'h03F7A0;
 	
 	assign dig_sample = SPI_REG[592];// r37
 	assign dig_update = SPI_REG[608];// r38				
 	assign mot_drive_code[7:0] = SPI_REG[631:624];	// r39
 	assign mot_allstop = SPI_REG[640];	// r40
-	
 	
 	wire [3:0] adc_chan;
 		
@@ -492,8 +474,6 @@ module kovan (
 		.DIG_SRLOAD(DIG_SRLOAD),
 		.DIG_CLR_N(DIG_CLR_N)
 	);
-   
-   
  
 	pwm heartbeat(
 		.clk812k(clk1M), 
