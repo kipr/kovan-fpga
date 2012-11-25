@@ -243,8 +243,8 @@ module kovan (
 	
 	
 	// neutral servo positions at startup
-	reg [687:0] SPI_REG = {224'd0, 16'd76, 16'd76, 16'd76, 16'd76, 400'd0};
-	reg [687:0] SPI_REG_p = {224'd0, 16'd76, 16'd76, 16'd76, 16'd76, 400'd0};
+	reg [687:0] SPI_REG = 688'd0;
+	reg [687:0] SPI_REG_p = 688'd0;
 	
 	wire [687:384] COMMAND_REG;
 
@@ -318,7 +318,7 @@ module kovan (
 		servo_pwm3_r[23:8] <= SPI_REG[463:448];	// r28
 		dig_out_val_r <= SPI_REG[471:464];	// r29
 		
-		SPI_REG_p[687:384] <= {COMMAND_REG[687:542], 1'b0, COMMAND_REG[540:400], 16'h6677};//COMMAND_REG[1023:384];
+		SPI_REG_p[687:384] <= COMMAND_REG[687:384];//COMMAND_REG[1023:384];
 	end	
 		
 	

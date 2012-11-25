@@ -16,8 +16,7 @@ module spi(
 	reg [1:0] MOSIr; // Master-Out Slave-In
 	reg [15:0] SPI_OUTr;
 	reg [687:0] SPI_REGr = 688'd0;
-	reg [687:384] COMMAND_REGr = 304'd0;
-	
+	reg [687:384] COMMAND_REGr = {224'd0, 16'd76, 16'd76, 16'd76, 16'd76, 16'h6677};
 	
 	reg [1:0] state = 2'b00;
 	reg [9:0] address = 10'b00;
