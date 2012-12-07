@@ -243,10 +243,10 @@ module kovan (
 	
 	
 	// neutral servo positions at startup
-	reg [687:0] SPI_REG = 688'd0;
-	reg [687:0] SPI_REG_p = 688'd0;
+	reg [1039:0] SPI_REG = 1040'd0;
+	reg [1039:0] SPI_REG_p = 1040'd0;
 	
-	wire [687:384] COMMAND_REG;
+	wire [1039:384] COMMAND_REG;
 
 	reg [7:0] dig_out_val_r = 8'h00;
 
@@ -292,7 +292,7 @@ module kovan (
 	always @(posedge clk208M) begin
 	
 		SPI_REG[15:0] <= 16'h4A53;				
-		SPI_REG[687:16] <= SPI_REG_p[687:16];
+		SPI_REG[1039:16] <= SPI_REG_p[1039:16];
 
 		SPI_REG_p[31:16] <= {8'h00, dig_in_val};	// r01
 		SPI_REG_p[41:32]   <= adc_0_in[9:0];			// r02
@@ -318,7 +318,7 @@ module kovan (
 		servo_pwm3_r[23:8] <= SPI_REG[463:448];	// r28
 		dig_out_val_r <= SPI_REG[471:464];	// r29
 		
-		SPI_REG_p[687:384] <= COMMAND_REG[687:384];//COMMAND_REG[1023:384];
+		SPI_REG_p[1039:384] <= COMMAND_REG[1039:384];//COMMAND_REG[1023:384];
 	end	
 		
 	
@@ -430,10 +430,10 @@ module kovan (
 		.pwm_output(m_servo_out_r[3])
 	);
 
-   assign M_SERVO[0] = !m_servo_out[0]; // invert to compensate inverting level converters
-   assign M_SERVO[1] = !m_servo_out[1];
-   assign M_SERVO[2] = !m_servo_out[2];
-   assign M_SERVO[3] = !m_servo_out[3];
+   assign M_SERVO[0] = SPI_REG[641] & !m_servo_out[0]; // invert to compensate inverting level converters
+   assign M_SERVO[1] = SPI_REG[642] & !m_servo_out[1];
+   assign M_SERVO[2] = SPI_REG[643] & !m_servo_out[2];
+   assign M_SERVO[3] = SPI_REG[644] & !m_servo_out[3];
 
 	
    robot_iface iface(
