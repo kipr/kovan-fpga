@@ -57,11 +57,11 @@ module kovan (
 	output wire [3:0] M_SERVO,
 
 	// optional uart to outside world
-	input wire        EXT_TO_HOST_UART, // for now we're a fly on the wall
-	input wire        HOST_TO_EXT_UART,
+	//input wire        EXT_TO_HOST_UART, // for now we're a fly on the wall
+	//input wire        HOST_TO_EXT_UART,
 
 	// infrared receiver 
-	input wire        IR_RX,
+	//input wire        IR_RX,
 
 	// switch
 	input wire        INPUT_SW0,
@@ -105,8 +105,8 @@ module kovan (
 	input wire        FPGA_SYNC,
 
 	// I2C interfaces
-	input wire        PWR_SCL,  // we listen on this one
-	inout wire        PWR_SDA,
+	//input wire        PWR_SCL,  // we listen on this one
+	//inout wire        PWR_SDA,
 
 	// LED
 	output wire       FPGA_LED,
@@ -273,20 +273,33 @@ module kovan (
 	reg [11:0] mot_duty2_r = 12'd0;
 	reg [11:0] mot_duty3_r = 12'd0;
 	
-	reg [23:0] servo_pwm0_r = 24'd0;
-	reg [23:0] servo_pwm1_r = 24'd0;
-	reg [23:0] servo_pwm2_r = 24'd0;
-	reg [23:0] servo_pwm3_r = 24'd0;
+	reg [23:8] servo_pwm0_r = 24'd0;
+	reg [23:8] servo_pwm1_r = 24'd0;
+	reg [23:8] servo_pwm2_r = 24'd0;
+	reg [23:8] servo_pwm3_r = 24'd0;
 	
-	assign mot_duty0 = mot_duty0_r;
-	assign mot_duty1 = mot_duty1_r;
-	assign mot_duty2 = mot_duty2_r;
-	assign mot_duty3 = mot_duty3_r;
+	
+	reg [12:0] pid_pwm0;
+	reg [12:0] pid_pwm1;
+	reg [12:0] pid_pwm2;
+	reg [12:0] pid_pwm3;
+	
+	//  6 assign out = (enable) ? data : 1'bz;
+	//reg using_pid0 = 1'b0;
+	//reg using_pid1 = 1'b0;
+	//reg using_pid2 = 1'b0;
+	//reg using_pid3 = 1'b0;
+	
+	// TODO: direction, convert to unsigned
+	assign mot_duty0 =  mot_duty0_r; //(using_pid0) ? pid_pwm0[11:0] : mot_duty0_r;
+	assign mot_duty1 =  mot_duty0_r; //(using_pid1) ? pid_pwm1[11:0] : mot_duty1_r;
+	assign mot_duty2 =  mot_duty0_r; //(using_pid2) ? pid_pwm2[11:0] : mot_duty2_r;
+	assign mot_duty3 =  mot_duty0_r; //(using_pid3) ? pid_pwm3[11:0] : mot_duty3_r;
 
-	assign servo0_pwm_pulse = servo_pwm0_r;
-	assign servo1_pwm_pulse = servo_pwm1_r;
-	assign servo2_pwm_pulse = servo_pwm2_r;
-	assign servo3_pwm_pulse = servo_pwm3_r;
+	assign servo0_pwm_pulse = {servo_pwm0_r, 8'd0};
+	assign servo1_pwm_pulse = {servo_pwm1_r, 8'd0};
+	assign servo2_pwm_pulse = {servo_pwm2_r, 8'd0};
+	assign servo3_pwm_pulse = {servo_pwm3_r, 8'd0};
 
 	
 	always @(posedge clk208M) begin
@@ -354,6 +367,48 @@ module kovan (
 		.COMMAND_REG(COMMAND_REG)
 	);
 
+
+
+
+/*
+	// Inputs
+	reg [12:0] pos_d;
+	reg [12:0] pos;
+	reg [12:0] err_prev;
+	reg [12:0] int_err_prev;
+	reg [12:0] Kp_n;
+	reg [7:0] Kp_d;
+	reg [12:0] Ki_n;
+	reg [7:0] Ki_d;
+	reg [12:0] Kd_n;
+	reg [7:0] Kd_d;
+	reg clk;
+
+	// Outputs
+	wire [12:0] pid_pwm;
+	wire [12:0] pid_err;
+	wire [12:0] pid_int_err;
+	wire pid_dir;
+
+	// Inst/antiate the Unit Under Test (UUT)
+	pid pid_6stage (
+		.pos_d(pos_d), 
+		.pos(pos), 
+		.err_prev(err_prev), 
+		.int_err_prev(int_err_prev), 
+		.Kp_n(Kp_n), 
+		.Kp_d(Kp_d), 
+		.Ki_n(Ki_n), 
+		.Ki_d(Ki_d), 
+		.Kd_n(Kd_n), 
+		.Kd_d(Kd_d), 
+		.clk(clk), 
+		.pwm(pid_pwm), 
+		.err(pid_err), 
+		.int_err(pid_int_err), 
+		.dir(pid_dir)
+	);
+*/
 
 	quad_motor motor_controller (
 		.clk(clk26buf),
@@ -481,6 +536,8 @@ module kovan (
 		.bright(12'b0001_1111_1000), 
 		.dim(12'b0000_0000_1000) 
 	);
+
+
 
    assign FPGA_LED = !blue_led;
 
