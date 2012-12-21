@@ -29,7 +29,6 @@
 module robot_iface(
 	     input wire  clk,
 	     input wire  clk_3p2MHz,
-	     input wire  clk_208MHz,
 	     input wire  glbl_reset,
 
 	     // digital i/o block
@@ -38,8 +37,6 @@ module robot_iface(
 	     input wire [7:0] dig_pu,
 	     input wire [7:0] ana_pu,
 	     output reg [7:0] dig_in_val,
-	     output wire      dig_val_good, // output value is valid when high
-	     output wire      dig_busy,    // chain is busy when high
 	     input wire       dig_sample,  // samples input on rising edge
 	     input wire       dig_update,  // updates chain on rising edge
 
@@ -75,7 +72,7 @@ module robot_iface(
    reg 			 go_edge;
 
    reg 			 dinsamp;
-   
+
    wire 		 motor_reset;
    sync_reset  motor_reset_sync(
 			  .clk(clk),
@@ -106,11 +103,9 @@ module robot_iface(
    
    reg [5:0] 		  shift_count;
    reg 			  dig_srload;
-   reg [39:0] 		  shift_in;
+   reg [30:0] 		  shift_in;
    reg [31:0] 		  shift_out;
    reg 			  update_dig;
-   reg 			  busy;
-   reg 			  dgood;
 
       
    always @ (negedge clk) begin
@@ -146,11 +141,13 @@ module robot_iface(
 	   SR_nstate = SR_INIT;
 	end
 
+	default: begin
+		// TODO: test
+		SR_nstate = SR_INIT;
+	end
       endcase // case (SR_cstate)
    end
 
-   assign dig_busy = busy;
-   assign dig_val_good = dgood;
 
    // 0x40 ff ff ff  (locating input data on shift chain, in value = 0x81)
    //  30       23        15                0
@@ -172,13 +169,7 @@ module robot_iface(
 	   update_dig <= 1'b1;
 	   dig_in_val <= dig_in_val;
 
-	   if( dinsamp ) begin
-	      dgood <= 1'b0;
-	   end else begin
-	      dgood <= dgood;
-	   end
-	   
-	   busy <= busy;
+	   	   
 	end
 	SR_START_DIG: begin
 	   shift_count <= 6'b0;
@@ -189,32 +180,26 @@ module robot_iface(
 	   update_dig <= 1'b1;
 	   dig_in_val <= dig_in_val;
 	   
-	   dgood <= 1'b0;
-	   busy <= 1'b1;
 	end
 	SR_SHIFT_DIG: begin
 	   shift_count <= shift_count + 6'b1;
-	   shift_in[39:0] <= {shift_in[38:0],DIG_OUT};
+	   shift_in[30:0] <= {shift_in[29:0],DIG_OUT};
 	   shift_out <= {shift_out[30:0],1'b1};
 	   
 	   dig_srload <= 1'b1;
 	   update_dig <= 1'b1;
 	   dig_in_val <= dig_in_val;
 
-	   dgood <= dgood;
-	   busy <= 1'b1;
 	end
 	SR_SHIFT_DIG_TERM: begin
 	   shift_count <= shift_count + 6'b1;
-	   shift_in[39:0] <= {shift_in[38:0],DIG_OUT};
+	   shift_in[30:0] <= {shift_in[29:0],DIG_OUT};
 	   shift_out <= {shift_out[30:0],1'b1};
 	   
 	   dig_srload <= 1'b1;
 	   update_dig <= 1'b0;
 	   dig_in_val <= dig_in_val;
 	   
-	   dgood <= dgood;
-	   busy <= 1'b1;
 	end
 	SR_DIG_DONE: begin
 	   shift_count <= shift_count;
@@ -225,8 +210,15 @@ module robot_iface(
 	   update_dig <= 1'b1;
 	   dig_in_val <= shift_in[30:23];
 	   
-	   dgood <= 1'b1;
-	   busy <= 1'b0;
+	end
+	default: begin
+		// TODO: test
+		shift_count <= shift_count;
+	   shift_in <= shift_in;
+	   shift_out <= shift_out;
+	   dig_srload <= dig_srload;
+	   update_dig <= update_dig;
+	   dig_in_val <= dig_in_val;
 	end
       endcase // case (SR_cstate)
    end // always @ (posedge clk)
@@ -254,20 +246,15 @@ module robot_iface(
    parameter ADC_nSTATES = 5;
 
    reg [(ADC_nSTATES-1):0] ADC_cstate = {{(ADC_nSTATES-1){1'b0}}, 1'b1};
-   reg [(ADC_nSTATES-1):0] ADC_nstate;
 
-   wire 		   motor_reset_3p2;
-   sync_reset  motor_reset_sync_3p2(
-			  .clk(clk_3p2MHz),
-			  .glbl_reset(glbl_reset),
-			  .reset(motor_reset_3p2) );
+   reg [(ADC_nSTATES-1):0] ADC_nstate;
 
 
    reg 			   adc_go_d;
    reg 			   adc_go_edge;
    reg [4:0] 		   adc_shift_count;
    reg [15:0] 		   adc_shift_out;
-   reg [15:0] 		   adc_shift_in;
+   reg [11:0] 		   adc_shift_in;
    reg [1:0] 		   adc_cs;
    
    always @(posedge clk_3p2MHz) begin
@@ -276,9 +263,6 @@ module robot_iface(
    end // always @ (posedge clk)
    
    always @ (posedge clk_3p2MHz) begin
-      if (motor_reset_3p2)
-	ADC_cstate <= ADC_INIT; 
-      else
 	ADC_cstate <= ADC_nstate;
    end
 
@@ -307,7 +291,10 @@ module robot_iface(
 	ADC_DONE: begin
 	   ADC_nstate = ADC_INIT;
 	end
-
+	default: begin
+			// TODO: test
+		   ADC_nstate = ADC_INIT;
+	end
       endcase // case (ADC_cstate)
    end
    
@@ -317,7 +304,7 @@ module robot_iface(
 	ADC_INIT: begin
 	   adc_shift_count <= 5'b0;
 	   adc_shift_out <= 32'b1111_1111_1111_1111;
-	   adc_shift_in <= 16'b0;
+	   adc_shift_in <= 12'b0;
 	   adc_cs <= 2'b11;
 	   
 	   adc_valid <= adc_valid;
@@ -334,18 +321,18 @@ module robot_iface(
 	   adc_in <= adc_in;
 	end
 	ADC_SHIFT: begin
-	   adc_shift_count <= adc_shift_count + 6'b1;
+	   adc_shift_count <= adc_shift_count + 1'b1;
 	   adc_shift_out <= {adc_shift_out[14:0],1'b1};
-	   adc_shift_in[15:0] <= {adc_shift_in[14:0], DIG_ADC_OUT};
+	   adc_shift_in[11:0] <= {adc_shift_in[10:0], DIG_ADC_OUT};
 	   adc_cs <= adc_cs;
 	   
 	   adc_valid <= 0;
 	   adc_in <= adc_in;
 	end
 	ADC_SHIFT_TERM: begin
-	   adc_shift_count <= adc_shift_count + 6'b1;
+	   adc_shift_count <= adc_shift_count + 1'b1;
 	   adc_shift_out <= {adc_shift_out[14:0],1'b1};
-	   adc_shift_in[15:0] <= {adc_shift_in[14:0], DIG_ADC_OUT};
+	   adc_shift_in[11:0] <= {adc_shift_in[10:0], DIG_ADC_OUT};
 	   adc_cs <= adc_cs;
 	   
 	   adc_valid <= 0;
@@ -359,6 +346,15 @@ module robot_iface(
 	   
 	   adc_valid <= 1;
 	   adc_in <= adc_shift_in[11:2];
+	end
+	default: begin
+		//TODO: untested
+		adc_shift_count <= adc_shift_count;
+	   adc_shift_out <= adc_shift_out;
+	   adc_shift_in <= adc_shift_in;
+	   adc_cs <= adc_cs;
+	   adc_valid <= adc_valid;
+	   adc_in <= adc_in;
 	end
       endcase // case (ADC_cstate)
    end // always @ (posedge clk)

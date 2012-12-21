@@ -29,7 +29,7 @@ module servo_pwm(
       if( period_cnt[23:0] >= period[23:0] ) begin
 	 period_cnt <= 24'h0;
       end else begin
-	 period_cnt <= period_cnt + 1;
+	 period_cnt <= period_cnt + 1'b1;
       end
    end // always @ (posedge clk or posedge reset)
 
