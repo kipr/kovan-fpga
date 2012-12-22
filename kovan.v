@@ -312,26 +312,26 @@ module kovan (
    reg [9:0] adc_15_new;
    reg [9:0] adc_16_new;
 	
-	wire [15:0] bemf_0;
-   wire [15:0] bemf_1;
-   wire [15:0] bemf_2;
-   wire [15:0] bemf_3;
+	wire [21:0] bemf_0;
+   wire [21:0] bemf_1;
+   wire [21:0] bemf_2;
+   wire [21:0] bemf_3;
 	
-	reg [15:0] bemf_0_r;
-   reg [15:0] bemf_1_r;
-   reg [15:0] bemf_2_r;
-   reg [15:0] bemf_3_r;
+	reg [21:0] bemf_0_r;
+   reg [21:0] bemf_1_r;
+   reg [21:0] bemf_2_r;
+   reg [21:0] bemf_3_r;
 	
 	
-	reg [15:0] bemf_0_r_208M = 16'd0;
-   reg [15:0] bemf_1_r_208M = 16'd0;
-   reg [15:0] bemf_2_r_208M = 16'd0;
-   reg [15:0] bemf_3_r_208M = 16'd0;
+	reg [21:0] bemf_0_r_208M = 22'd0;
+   reg [21:0] bemf_1_r_208M = 22'd0;
+   reg [21:0] bemf_2_r_208M = 22'd0;
+   reg [21:0] bemf_3_r_208M = 22'd0;
 	
-	reg [15:0] bemf_0_calib = 16'd0;
-   reg [15:0] bemf_1_calib = 16'd0;
-   reg [15:0] bemf_2_calib = 16'd0;
-   reg [15:0] bemf_3_calib = 16'd0;
+	reg [21:0] bemf_0_calib = 22'd0;
+   reg [21:0] bemf_1_calib = 22'd0;
+   reg [21:0] bemf_2_calib = 22'd0;
+   reg [21:0] bemf_3_calib = 22'd0;
 	
 
 	reg [11:0] mot_duty0_old = 12'd0;
@@ -424,6 +424,9 @@ module kovan (
 	assign bemf_2 = bemf_2_r_208M;
 	assign bemf_3 = bemf_3_r_208M;
 
+	wire bemf_sensing;
+	reg bemf_sensing_r = 1'd0;
+	assign bemf_sensing = bemf_sensing_r;
 
 	always @ (posedge clk208M) begin
 		
@@ -503,12 +506,12 @@ module kovan (
 	reg [9:0] bemf_adc_l = 10'd0;
 	reg [1:0] bemf_mot_sel_in = 2'd0;
 	reg bemf_in_valid = 1'd0;
-	reg [15:0] bemf_in = 16'd0;
-	reg [15:0] bemf_calib_in = 16'd0;
+	reg [21:0] bemf_in = 22'd0;
+	reg [21:0] bemf_calib_in = 22'd0;
 
 	wire [1:0] bemf_mot_sel_out;
 	wire bemf_out_valid;
-	wire [15:0] bemf_out;
+	wire [21:0] bemf_out;
 
 	reg [15:0] bemf_counter = 16'd0; // can count for up to ~20mS
 	reg [2:0] bemf_state = 3'd0;
@@ -552,6 +555,7 @@ module kovan (
 		3'd0: begin
 			bemf_counter <= bemf_counter + 1'd1;
 			bemf_in_valid <= 1'd0;
+			bemf_sensing_r <= 1'd0;
 			
 			if (bemf_counter > 3200) // 1mS
 				bemf_state <= bemf_state + 1'd1;
@@ -563,7 +567,9 @@ module kovan (
 		3'd1: begin
 			bemf_counter <= bemf_counter + 1'd1;
 			bemf_in_valid <= 1'd0;
-			if (bemf_counter > 6400) // 2mS
+			bemf_sensing_r <= 1'd1;
+
+			if (bemf_counter > 12800) // 4mS
 				bemf_state <= bemf_state + 1'd1;
 			else
 				bemf_state <= bemf_state;
@@ -573,11 +579,12 @@ module kovan (
 		3'd2: begin
 			bemf_counter <= bemf_counter + 1'd1;
 			bemf_state <= bemf_state + 1'd1;
-			bemf_adc_h <= adc_8_in;
-			bemf_adc_l <= adc_9_in;
+			bemf_adc_h <= adc_9_in;
+			bemf_adc_l <= adc_8_in;
 			bemf_mot_sel_in <= 2'd0;
 			bemf_in_valid <= 1'd1;
 			bemf_in <= bemf_0;
+			bemf_sensing_r <= 1'd0;
 			bemf_calib_in <= bemf_0_calib;
 		end
 		
@@ -586,8 +593,8 @@ module kovan (
 		3'd3: begin
 			bemf_counter <= bemf_counter + 1'd1;
 			bemf_state <= bemf_state + 1'd1;
-			bemf_adc_h <= adc_10_in;
-			bemf_adc_l <= adc_11_in;
+			bemf_adc_h <= adc_11_in;
+			bemf_adc_l <= adc_10_in;
 			bemf_mot_sel_in <= 2'd1;
 			bemf_in_valid <= 1'd1;
 			bemf_in <= bemf_1;
@@ -599,8 +606,8 @@ module kovan (
 		3'd4: begin
 			bemf_counter <= bemf_counter + 1'd1;
 			bemf_state <= bemf_state + 1'd1;
-			bemf_adc_h <= adc_12_in;
-			bemf_adc_l <= adc_13_in;
+			bemf_adc_h <= adc_13_in;
+			bemf_adc_l <= adc_12_in;
 			bemf_mot_sel_in <= 2'd2;
 			bemf_in_valid <= 1'd1;
 			bemf_in <= bemf_2;
@@ -612,8 +619,8 @@ module kovan (
 		3'd5: begin
 			bemf_counter <= bemf_counter + 1'd1;
 			bemf_state <= bemf_state + 1'd1;
-			bemf_adc_h <= adc_14_in;
-			bemf_adc_l <= adc_15_in;
+			bemf_adc_h <= adc_15_in;
+			bemf_adc_l <= adc_14_in;
 			bemf_mot_sel_in <= 2'd3;
 			bemf_in_valid <= 1'd1;
 			bemf_in <= bemf_3;
@@ -625,7 +632,7 @@ module kovan (
 		3'd6: begin
 			bemf_in_valid <= 1'd0;
 			
-			if (bemf_counter > 32000) begin// 10mS total
+			if (bemf_counter > 64000) begin// 20mS total
 				bemf_state <= bemf_state + 1'd1;
 				bemf_counter <= bemf_counter + 1'd1;
 			end else begin
@@ -636,6 +643,7 @@ module kovan (
 		
 		default: begin
 			bemf_state <= 3'd0;
+			bemf_sensing_r <= 1'd0;
 			bemf_counter <= 16'd0;
 		end
 		endcase
@@ -685,10 +693,10 @@ module kovan (
 		.adc_15_in(adc_15_old),
 		.adc_16_in(adc_16_old),
 		.charge_acp_in(CHG_ACP),
-		.bemf_0(bemf_0_r_208M),
-	   .bemf_1(bemf_1_r_208M),
-		.bemf_2(bemf_2_r_208M),
-		.bemf_3(bemf_3_r_208M),
+		.bemf_0(bemf_0_r_208M[21:6]),
+	   .bemf_1(bemf_1_r_208M[21:6]),
+		.bemf_2(bemf_2_r_208M[21:6]),
+		.bemf_3(bemf_3_r_208M[21:6]),
 		.servo_pwm0_high(servo_pwm0_old),
 		.servo_pwm1_high(servo_pwm1_old),
 		.servo_pwm2_high(servo_pwm2_old),
@@ -775,6 +783,7 @@ module kovan (
 		.duty2(mot_duty2),
 		.duty3(mot_duty3),
 		.drive_code(mot_drive_code),
+		.bemf_sensing(bemf_sensing),
 		.pwm(MOT_PWM),
 		.MBOT(MBOT[3:0]),
 		.MTOP(MTOP[3:0])
@@ -784,7 +793,7 @@ module kovan (
 		.clk3p2M(clk3p2M),
 		.adc_in(adc_in),
 		.adc_valid(adc_valid),
-		//.bemf_sensing(bemf_sensing),
+		.bemf_sensing(bemf_sensing),
 		.adc_go(adc_go),
 		.adc_chan(adc_chan),
 		.adc_0_in(adc_0_in),

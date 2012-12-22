@@ -31,6 +31,7 @@ module quad_motor(
 	input [11:0] duty2,
 	input [11:0] duty3,
 	input [7:0] drive_code,
+	input bemf_sensing,
 	output pwm,
 	output [3:0] MBOT,
 	output [3:0] MTOP
@@ -41,8 +42,8 @@ module quad_motor(
 	reg [3:0] MTOP_r = 4'b0000;
 	reg [11:0] count = 12'h0000;
 	
-	assign MBOT[3:0] = MTOP_r[3:0];
-	assign MTOP[3:0] = MBOT_r[3:0];
+	assign MBOT[3:0] = MTOP_r[3:0] & {~bemf_sensing,~bemf_sensing,~bemf_sensing,~bemf_sensing};
+	assign MTOP[3:0] = MBOT_r[3:0] & {~bemf_sensing,~bemf_sensing,~bemf_sensing,~bemf_sensing};
 	
 	reg pwm_r;
 	assign pwm = pwm_r;

@@ -4,7 +4,7 @@ module auto_adc_updater(
 	input clk3p2M,
 	input [9:0] adc_in,
 	input adc_valid,
-	//input bemf_sensing,
+	input bemf_sensing,
 	output adc_go,
 	output [3:0] adc_chan,
 	output [9:0] adc_0_in,
@@ -125,14 +125,14 @@ module auto_adc_updater(
 							5'd5: adc_5_in_r <= adc_in;
 							5'd6: adc_6_in_r <= adc_in;
 							5'd7: adc_7_in_r <= adc_in; 
-							5'd8: adc_8_in_r <= adc_in;
-							5'd9: adc_9_in_r <= adc_in;
-							5'd10: adc_10_in_r <= adc_in;
-							5'd11: adc_11_in_r <= adc_in;
-							5'd12: adc_12_in_r <= adc_in;
-							5'd13: adc_13_in_r <= adc_in;
-							5'd14: adc_14_in_r <= adc_in;
-							5'd15: adc_15_in_r <= adc_in;
+							5'd8: if (bemf_sensing) adc_8_in_r <= adc_in;
+							5'd9: if (bemf_sensing) adc_9_in_r <= adc_in;
+							5'd10: if (bemf_sensing) adc_10_in_r <= adc_in;
+							5'd11: if (bemf_sensing) adc_11_in_r <= adc_in;
+							5'd12: if (bemf_sensing) adc_12_in_r <= adc_in;
+							5'd13: if (bemf_sensing) adc_13_in_r <= adc_in;
+							5'd14: if (bemf_sensing) adc_14_in_r <= adc_in;
+							5'd15: if (bemf_sensing) adc_15_in_r <= adc_in;
 							5'd16: adc_16_in_r <= adc_in;
 							default:;
 						endcase
