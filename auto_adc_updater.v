@@ -127,8 +127,8 @@ module auto_adc_updater(
 							5'd7: adc_7_in_r <= adc_in; 
 							5'd8: adc_8_in_r <= adc_in;
 							5'd9: adc_9_in_r <= adc_in;
-							5'd10: adc_10_in_r <= 10'd2;//TODO: adc_in;
-							5'd11: adc_11_in_r <= 10'd0;//TODO: adc_in;
+							5'd10: adc_10_in_r <= adc_in;
+							5'd11: adc_11_in_r <= adc_in;
 							5'd12: adc_12_in_r <= adc_in;
 							5'd13: adc_13_in_r <= adc_in;
 							5'd14: adc_14_in_r <= adc_in;
