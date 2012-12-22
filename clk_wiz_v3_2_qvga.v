@@ -126,8 +126,8 @@ module clk_wiz_v3_2_qvga
     .CLKOUT1               (clkout1),
     .CLKOUT2               (clkout2),
     .CLKOUT3               (clkout3),
-    .CLKOUT4               (),
-    .CLKOUT5               (),
+    .CLKOUT4               (clkout4_unused),
+    .CLKOUT5               (clkout5_unused),
     // Status and control signals
     .LOCKED                (LOCKED),
     .RST                   (RESET),

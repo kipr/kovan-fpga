@@ -123,6 +123,7 @@ module kovan (
    wire		clk13buf;
    wire		clk3p2M;
    wire		clk208M;
+	//wire		clk104M;
    wire		clk1M = 1'b0;  // wired up in the serial number section
    
    assign clk26 = OSC_CLK;
@@ -152,6 +153,7 @@ module kovan (
 			  .clk_out13(clk13buf),
 			  .clk_out3p25(clk3p2M), // note: a slight overclock (about 2%)
 			  .clk_out208(clk208M),
+			  //.clk_out104(clk104M),
 			  .RESET(1'b0),//.RESET(glbl_reset),
 			  .LOCKED(qvga_clkgen_locked) );
 				  
@@ -225,6 +227,10 @@ module kovan (
    wire       dig_sample;
    wire       dig_update;
 
+	reg [7:0] dig_in_val_old = 8'd0;
+	reg [7:0] dig_in_val_new = 8'd0;
+	
+
    wire [9:0] adc_in;
    wire [3:0] adc_chan;
    wire       adc_valid;
@@ -243,8 +249,6 @@ module kovan (
    wire [23:0] servo1_pwm_pulse;
    wire [23:0] servo2_pwm_pulse;
    wire [23:0] servo3_pwm_pulse;
-	
-	
 	
 	// neutral servo positions at startup
 	//reg [1039:0] SPI_REG = 1040'd0;
@@ -271,6 +275,63 @@ module kovan (
    wire [9:0] adc_14_in;
    wire [9:0] adc_15_in;
    wire [9:0] adc_16_in;
+	
+	reg [9:0] adc_0_old;
+   reg [9:0] adc_1_old;
+   reg [9:0] adc_2_old;
+   reg [9:0] adc_3_old;
+   reg [9:0] adc_4_old;
+   reg [9:0] adc_5_old;
+   reg [9:0] adc_6_old;
+   reg [9:0] adc_7_old;
+   reg [9:0] adc_8_old;
+   reg [9:0] adc_9_old;
+   reg [9:0] adc_10_old;
+   reg [9:0] adc_11_old;
+   reg [9:0] adc_12_old;
+   reg [9:0] adc_13_old;
+   reg [9:0] adc_14_old;
+   reg [9:0] adc_15_old;
+   reg [9:0] adc_16_old;
+	
+	reg [9:0] adc_0_new;
+   reg [9:0] adc_1_new;
+   reg [9:0] adc_2_new;
+   reg [9:0] adc_3_new;
+   reg [9:0] adc_4_new;
+   reg [9:0] adc_5_new;
+   reg [9:0] adc_6_new;
+   reg [9:0] adc_7_new;
+   reg [9:0] adc_8_new;
+   reg [9:0] adc_9_new;
+   reg [9:0] adc_10_new;
+   reg [9:0] adc_11_new;
+   reg [9:0] adc_12_new;
+   reg [9:0] adc_13_new;
+   reg [9:0] adc_14_new;
+   reg [9:0] adc_15_new;
+   reg [9:0] adc_16_new;
+	
+	wire [15:0] bemf_0;
+   wire [15:0] bemf_1;
+   wire [15:0] bemf_2;
+   wire [15:0] bemf_3;
+	
+	reg [15:0] bemf_0_r;
+   reg [15:0] bemf_1_r;
+   reg [15:0] bemf_2_r;
+   reg [15:0] bemf_3_r;
+	
+	
+	reg [15:0] bemf_0_r_208M = 16'd0;
+   reg [15:0] bemf_1_r_208M = 16'd0;
+   reg [15:0] bemf_2_r_208M = 16'd0;
+   reg [15:0] bemf_3_r_208M = 16'd0;
+	
+	reg [15:0] bemf_0_calib = 16'd0;
+   reg [15:0] bemf_1_calib = 16'd0;
+   reg [15:0] bemf_2_calib = 16'd0;
+   reg [15:0] bemf_3_calib = 16'd0;
 	
 
 	reg [11:0] mot_duty0_old = 12'd0;
@@ -316,7 +377,10 @@ module kovan (
 	wire [7:0] mot_drive_code_new;
 	wire [4:0] mot_allstop_new;
 
-	
+/*
+	reg bemf_calib_cmd_old = 1'd0;
+	wire bemf_calib_cmd_new;
+	*/
 	
 	//reg [12:0] pid_pwm0;
 	//reg [12:0] pid_pwm1;
@@ -354,6 +418,13 @@ module kovan (
 	assign mot_drive_code = mot_drive_code_old;
 	assign mot_allstop = mot_allstop_old;
 
+
+	assign bemf_0 = bemf_0_r_208M;
+	assign bemf_1 = bemf_1_r_208M;
+	assign bemf_2 = bemf_2_r_208M;
+	assign bemf_3 = bemf_3_r_208M;
+
+
 	always @ (posedge clk208M) begin
 		
 		mot_duty0_old <= mot_duty0_new;
@@ -375,10 +446,213 @@ module kovan (
 		mot_drive_code_old <= mot_drive_code_new;
 		mot_allstop_old <= mot_allstop_new;
 		
+		//bemf_calib_cmd_old <= bemf_calib_cmd_new;
+	
+		bemf_0_r_208M <= bemf_0_r;
+		bemf_1_r_208M <= bemf_1_r;
+		bemf_2_r_208M <= bemf_2_r;
+		bemf_3_r_208M <= bemf_3_r;
+		
+		adc_0_new <= adc_0_in;
+		adc_1_new <= adc_1_in;
+		adc_2_new <= adc_2_in;
+		adc_3_new <= adc_3_in;
+		adc_4_new <= adc_4_in;
+		adc_5_new <= adc_5_in;
+		adc_6_new <= adc_6_in;
+		adc_7_new <= adc_7_in;
+		adc_8_new <= adc_8_in;
+		adc_9_new <= adc_9_in;
+		adc_10_new <= adc_10_in;
+		adc_11_new <= adc_11_in;
+		adc_12_new <= adc_12_in;
+		adc_13_new <= adc_13_in;
+		adc_14_new <= adc_14_in;
+		adc_15_new <= adc_15_in;
+		adc_16_new <= adc_16_in;
+		
+		adc_0_old <= adc_0_new;
+		adc_1_old <= adc_1_new;
+		adc_2_old <= adc_2_new;
+		adc_3_old <= adc_3_new;
+		adc_4_old <= adc_4_new;
+		adc_5_old <= adc_5_new;
+		adc_6_old <= adc_6_new;
+		adc_7_old <= adc_7_new;
+		adc_8_old <= adc_8_new;
+		adc_9_old <= adc_9_new;
+		adc_10_old <= adc_10_new;
+		adc_11_old <= adc_11_new;
+		adc_12_old <= adc_12_new;
+		adc_13_old <= adc_13_new;
+		adc_14_old <= adc_14_new;
+		adc_15_old <= adc_15_new;
+		adc_16_old <= adc_16_new;
+		
+		dig_in_val_new <= dig_in_val;
+		dig_in_val_old <= dig_in_val_new;
 	end
 
 
 	assign servo_pwm_period[23:0] =  24'h03F7A0;
+
+
+
+
+	reg [9:0] bemf_adc_h = 10'd0;
+	reg [9:0] bemf_adc_l = 10'd0;
+	reg [1:0] bemf_mot_sel_in = 2'd0;
+	reg bemf_in_valid = 1'd0;
+	reg [15:0] bemf_in = 16'd0;
+	reg [15:0] bemf_calib_in = 16'd0;
+
+	wire [1:0] bemf_mot_sel_out;
+	wire bemf_out_valid;
+	wire [15:0] bemf_out;
+
+	reg [15:0] bemf_counter = 16'd0; // can count for up to ~20mS
+	reg [2:0] bemf_state = 3'd0;
+	
+	/*
+	always @(posedge clk3p2M) begin
+	
+		bemf_0_r <= bemf_out + 3'd1;
+		bemf_1_r <= bemf_out + 3'd2;
+		bemf_2_r <= bemf_out + 3'd3;
+		bemf_3_r <= bemf_out + 3'd4;
+	
+	end
+	*/
+	
+
+	always @(posedge clk3p2M) begin
+
+		if (bemf_out_valid) begin
+			case(bemf_mot_sel_out)
+			2'd0: begin
+				bemf_0_r <= bemf_out;
+			end
+			2'd1: begin 
+				bemf_1_r <= bemf_out;
+			end
+			2'd2: begin
+				bemf_2_r <= bemf_out;
+			end
+			2'd3: begin
+				bemf_3_r <= bemf_out;
+			end
+			endcase
+		end
+
+		// BEMF: FSM		
+		case(bemf_state)		
+
+			
+		// Turn all motors off and wait ~600uS +
+		3'd0: begin
+			bemf_counter <= bemf_counter + 1'd1;
+			bemf_in_valid <= 1'd0;
+			
+			if (bemf_counter > 3200) // 1mS
+				bemf_state <= bemf_state + 1'd1;
+			else
+				bemf_state <= bemf_state;
+		end
+		
+		// update adc values
+		3'd1: begin
+			bemf_counter <= bemf_counter + 1'd1;
+			bemf_in_valid <= 1'd0;
+			if (bemf_counter > 6400) // 2mS
+				bemf_state <= bemf_state + 1'd1;
+			else
+				bemf_state <= bemf_state;
+		end		
+		
+		// call update bemf_0
+		3'd2: begin
+			bemf_counter <= bemf_counter + 1'd1;
+			bemf_state <= bemf_state + 1'd1;
+			bemf_adc_h <= adc_8_in;
+			bemf_adc_l <= adc_9_in;
+			bemf_mot_sel_in <= 2'd0;
+			bemf_in_valid <= 1'd1;
+			bemf_in <= bemf_0;
+			bemf_calib_in <= bemf_0_calib;
+		end
+		
+		
+		// call update bemf_1
+		3'd3: begin
+			bemf_counter <= bemf_counter + 1'd1;
+			bemf_state <= bemf_state + 1'd1;
+			bemf_adc_h <= adc_10_in;
+			bemf_adc_l <= adc_11_in;
+			bemf_mot_sel_in <= 2'd1;
+			bemf_in_valid <= 1'd1;
+			bemf_in <= bemf_1;
+			bemf_calib_in <= bemf_1_calib;
+		end
+		
+		
+		// call update bemf_2
+		3'd4: begin
+			bemf_counter <= bemf_counter + 1'd1;
+			bemf_state <= bemf_state + 1'd1;
+			bemf_adc_h <= adc_12_in;
+			bemf_adc_l <= adc_13_in;
+			bemf_mot_sel_in <= 2'd2;
+			bemf_in_valid <= 1'd1;
+			bemf_in <= bemf_2;
+			bemf_calib_in <= bemf_2_calib;
+		end
+		
+		
+		// call update bemf_3
+		3'd5: begin
+			bemf_counter <= bemf_counter + 1'd1;
+			bemf_state <= bemf_state + 1'd1;
+			bemf_adc_h <= adc_14_in;
+			bemf_adc_l <= adc_15_in;
+			bemf_mot_sel_in <= 2'd3;
+			bemf_in_valid <= 1'd1;
+			bemf_in <= bemf_3;
+			bemf_calib_in <= bemf_3_calib;
+		end
+		
+	
+		// wait and update bemf registers
+		3'd6: begin
+			bemf_in_valid <= 1'd0;
+			
+			if (bemf_counter > 32000) begin// 10mS total
+				bemf_state <= bemf_state + 1'd1;
+				bemf_counter <= bemf_counter + 1'd1;
+			end else begin
+				bemf_state <= 3'd0;
+				bemf_counter <= 16'd0;
+			end
+		end
+		
+		default: begin
+			bemf_state <= 3'd0;
+			bemf_counter <= 16'd0;
+		end
+		endcase
+	end
+
+	bemf_update bemf_single_update(
+	 .bemf_adc_h(bemf_adc_h),
+    .bemf_adc_l(bemf_adc_l),
+    .mot_sel_in(bemf_mot_sel_in),
+    .in_valid(bemf_in_valid),
+    .bemf_in(bemf_in),
+	 .bemf_calib_in(bemf_calib_in),
+    .clk(clk3p2M),
+    .bemf_out(bemf_out),
+    .mot_sel_out(bemf_mot_sel_out),
+    .out_valid(bemf_out_valid)
+	);
 
 	spi pxa_spi (
 
@@ -392,25 +666,29 @@ module kovan (
 		.MISO(FPGA_MISO), 
 
 		// Read-Only Registers
-		.dig_in_val(dig_in_val),
-		.adc_0_in(adc_0_in),
-		.adc_1_in(adc_1_in),
-		.adc_2_in(adc_2_in),
-		.adc_3_in(adc_3_in),
-		.adc_4_in(adc_4_in),
-		.adc_5_in(adc_5_in),
-		.adc_6_in(adc_6_in),
-		.adc_7_in(adc_7_in),
-		.adc_8_in(adc_8_in),
-		.adc_9_in(adc_9_in),
-		.adc_10_in(adc_10_in),
-		.adc_11_in(adc_11_in),
-		.adc_12_in(adc_12_in),
-		.adc_13_in(adc_13_in),
-		.adc_14_in(adc_14_in),
-		.adc_15_in(adc_15_in),
-		.adc_16_in(adc_16_in),
+		.dig_in_val(dig_in_val_old),
+		.adc_0_in(adc_0_old),
+		.adc_1_in(adc_1_old),
+		.adc_2_in(adc_2_old),
+		.adc_3_in(adc_3_old),
+		.adc_4_in(adc_4_old),
+		.adc_5_in(adc_5_old),
+		.adc_6_in(adc_6_old),
+		.adc_7_in(adc_7_old),
+		.adc_8_in(adc_8_old),
+		.adc_9_in(adc_9_old),
+		.adc_10_in(adc_10_old),
+		.adc_11_in(adc_11_old),
+		.adc_12_in(adc_12_old),
+		.adc_13_in(adc_13_old),
+		.adc_14_in(adc_14_old),
+		.adc_15_in(adc_15_old),
+		.adc_16_in(adc_16_old),
 		.charge_acp_in(CHG_ACP),
+		.bemf_0(bemf_0_r_208M),
+	   .bemf_1(bemf_1_r_208M),
+		.bemf_2(bemf_2_r_208M),
+		.bemf_3(bemf_3_r_208M),
 		.servo_pwm0_high(servo_pwm0_old),
 		.servo_pwm1_high(servo_pwm1_old),
 		.servo_pwm2_high(servo_pwm2_old),
@@ -427,6 +705,7 @@ module kovan (
 		.dig_update(dig_update_old),
 		.mot_drive_code(mot_drive_code_old),
 		.mot_allstop(mot_allstop_old),
+	//	.bemf_calib_cmd(bemf_calib_cmd_old),
 
 		// Read-Write Registers
 		.servo_pwm0_high_new(servo_pwm0_new),
@@ -445,6 +724,7 @@ module kovan (
 		.dig_update_new(dig_update_new),
 		.mot_drive_code_new(mot_drive_code_new),
 		.mot_allstop_new(mot_allstop_new)
+	//	.bemf_calib_cmd_new(bemf_calib_cmd_new)
 	);
 
 
@@ -460,7 +740,6 @@ module kovan (
 	reg [7:0] Ki_d;
 	reg [12:0] Kd_n;
 	reg [7:0] Kd_d;
-	reg clk;
 
 	// Outputs
 	wire [12:0] pid_pwm;
@@ -480,7 +759,7 @@ module kovan (
 		.Ki_d(Ki_d), 
 		.Kd_n(Kd_n), 
 		.Kd_d(Kd_d), 
-		.clk(clk), 
+		.clk(clk3p2M), 
 		.pwm(pid_pwm), 
 		.err(pid_err), 
 		.int_err(pid_int_err), 
@@ -505,6 +784,7 @@ module kovan (
 		.clk3p2M(clk3p2M),
 		.adc_in(adc_in),
 		.adc_valid(adc_valid),
+		//.bemf_sensing(bemf_sensing),
 		.adc_go(adc_go),
 		.adc_chan(adc_chan),
 		.adc_0_in(adc_0_in),

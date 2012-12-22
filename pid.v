@@ -3,6 +3,8 @@
 module pid(
     input [12:0] pos_d,
 	 input [12:0] pos,
+	 input [12:0] vel_d,
+	 input [12:0] vel,
 	 input [12:0] err_prev,
 	 input [12:0] int_err_prev,
 	 input [12:0] Kp_n,
@@ -27,6 +29,17 @@ module pid(
 		.a(err_sub_in_a_r),
 		.b(err_sub_in_b_r),
 		.s(err_sub_out)
+	);
+	
+	
+	// get velocity error
+	reg [12:0] vel_err_sub_in_a_r;
+	reg [12:0] vel_err_sub_in_b_r;
+	wire [12:0] vel_err_sub_out;
+	s13_sub vel_err_sub(
+		.a(vel_err_sub_in_a_r),
+		.b(vel_err_sub_in_b_r),
+		.s(vel_err_sub_out)
 	);
 	
 	// integrate the error
@@ -165,12 +178,19 @@ module pid(
 	
 	reg [12:0] pid_out;
 	
+	reg close_enough_1;
+	reg close_enough_2;
+	
 	
 	always @ (posedge clk) begin
 	
+
 		// pipeline stage 0: load initial inputs
 		err_sub_in_a_r <= pos_d;
 		err_sub_in_b_r <= pos;	
+
+		vel_err_sub_in_a_r <= vel_d;
+		vel_err_sub_in_b_r <= vel;
 		err_prev_0 <= err_prev;
 
 		Kp_n_0 <= Kp_n;
@@ -183,12 +203,12 @@ module pid(
 
 	
 		// pipeline stage 1: calculate position errors
-		err_1 <= err_sub_out;
+		err_1 <= vel_err_sub_out;
 
 		int_err_in_a_r <= int_err_prev;
-		int_err_in_b_r <= err_sub_out; // err_1
+		int_err_in_b_r <= vel_err_sub_out; // err_1
 
-		d_err_in_a_r <= err_sub_out; // err_1
+		d_err_in_a_r <= vel_err_sub_out; // err_1
 		d_err_in_b_r <= err_prev_0; // err_prev_1
 
 		Kp_n_1 <= Kp_n_0;

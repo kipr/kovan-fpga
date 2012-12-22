@@ -1,7 +1,4 @@
 `timescale 1ns / 1ps
-
-`timescale 1ns / 1ps
-
 /*
 4 motors
 10 khz
