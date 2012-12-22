@@ -9,6 +9,7 @@ module bemf_update(
 	 input [19:0] bemf_calib_in,
     input clk,
     output [19:0] bemf_out,
+	 output [19:0] bemf_vel_out,
     output [1:0] mot_sel_out,
     output out_valid
     );
@@ -62,6 +63,9 @@ module bemf_update(
 	reg [19:0] bemf_in_0 = 20'd0;
 	reg [19:0] bemf_in_1 = 20'd0;
 	
+	
+	reg vel_out_3 = 20'd0;
+	
 	always @ (posedge clk) begin
 
 		// pipeline stage 0: load inputs
@@ -96,6 +100,8 @@ module bemf_update(
 	
 	
 		// pipeline stage 3: integrated the calibrated value
+		
+		vel_out_3 <= bemf_integr_in_a_r;
 		bemf_out_r <= bemf_integr_out;
 		in_valid_3 <= in_valid_2;
 		mot_sel_in_3 <= mot_sel_in_2;
@@ -105,5 +111,6 @@ module bemf_update(
 	assign bemf_out = bemf_out_r;
 	assign out_valid = in_valid_3;
 	assign mot_sel_out = mot_sel_in_3;
+	assign bemf_vel_out = vel_out_3;
 	
 endmodule

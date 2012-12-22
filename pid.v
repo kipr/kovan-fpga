@@ -13,11 +13,15 @@ module pid(
 	 input [7:0] Ki_d,
 	 input [12:0] Kd_n,
 	 input [7:0] Kd_d,
+	 input [1:0] pid_motor_id_in,
+	 input pid_in_valid,
 	 input clk,
-	 output [12:0] pwm,
+	 output [11:0] pwm,
 	 output [12:0] err,
 	 output [12:0] int_err,
-	 output dir
+	 output [1:0] drive_code,
+	 output [1:0] pid_motor_id_out,
+	 output pid_out_valid
     );
 	 
 
@@ -181,7 +185,21 @@ module pid(
 	reg close_enough_1;
 	reg close_enough_2;
 	
+	reg [1:0] pid_motor_id_in_0;
+	reg [1:0] pid_motor_id_in_1;
+	reg [1:0] pid_motor_id_in_2;
+	reg [1:0] pid_motor_id_in_3;
+	reg [1:0] pid_motor_id_in_4;
+	reg [1:0] pid_motor_id_in_5;
 	
+	reg pid_in_valid_0 = 1'b0;
+	reg pid_in_valid_1 = 1'b0;
+	reg pid_in_valid_2 = 1'b0;
+	reg pid_in_valid_3 = 1'b0;
+	reg pid_in_valid_4 = 1'b0;
+	reg pid_in_valid_5 = 1'b0;
+	
+
 	always @ (posedge clk) begin
 	
 
@@ -200,6 +218,10 @@ module pid(
 		Kp_d_0 <= Kp_d;
 		Ki_d_0 <= Ki_d;
 		Kd_d_0 <= Kd_d;
+		
+		pid_motor_id_in_0 <= pid_motor_id_in;
+		pid_in_valid_0 <= pid_in_valid;
+		
 
 	
 		// pipeline stage 1: calculate position errors
@@ -220,6 +242,8 @@ module pid(
 		Kd_d_1 <= Kd_d_0;
 
 
+		pid_motor_id_in_1 <= pid_motor_id_in_0;
+		pid_in_valid_1 <= pid_in_valid_0;
 
 
 		// pipeline stage 2:  integrate err, calc err deriv
@@ -237,6 +261,9 @@ module pid(
 		Kp_d_2 <= Kp_d_1;
 		Ki_d_2 <= Ki_d_1;
 		Kd_d_2 <= Kd_d_1;
+		
+		pid_motor_id_in_2 <= pid_motor_id_in_1;
+		pid_in_valid_2 <= pid_in_valid_1;
 
 
 
@@ -245,6 +272,8 @@ module pid(
 		//                   handle division/shifting by K_* denominator
 		err_3 <= err_2;
 		int_err_3 <= int_err_2;
+		pid_motor_id_in_3 <= pid_motor_id_in_2;
+		pid_in_valid_3 <= pid_in_valid_2;
 		
 		case (Kp_d_2)
 			8'd0:    pd_add_in_a <= kp_num_mult_out[12:0]; 
@@ -292,6 +321,8 @@ module pid(
 		int_err_4 <= int_err_3;
 		pid_add_in_a[12:0] <= pd_add_out[12:0];
 		pid_add_in_b[12:0] <= ki_contrib[12:0];
+		pid_motor_id_in_4 <= pid_motor_id_in_3;
+		pid_in_valid_4 <= pid_in_valid_3;
 
 
 
@@ -299,14 +330,17 @@ module pid(
 		err_r <= err_4;
 		int_err_r <= int_err_4;
 		pid_out <= pid_add_out;
+		pid_motor_id_in_5 <= pid_motor_id_in_4;
+		pid_in_valid_5 <= pid_in_valid_4;
 	
 	end
 
 	
 	// outputs
-	assign pwm = pid_out[12:0];
+	assign pwm = (pid_out[12]) ? ~pid_out[11:0] : pid_out[11:0]; // drops a bit in negative case
 	assign err = err_r;
 	assign int_err = int_err_r;
-	assign dir = !pid_out[12];
-	
+	assign drive_code = {!pid_out[12],pid_out[12]};
+	assign pid_motor_id_out = pid_motor_id_in_5;
+	assign pid_out_valid = pid_in_valid_5;
 endmodule

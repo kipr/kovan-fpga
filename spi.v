@@ -48,7 +48,11 @@ module spi(
 	input [0:0] dig_update,
 	input [7:0] mot_drive_code,
 	input [4:0] mot_allstop,
-	//input [0:0] bemf_calib_cmd,
+	input [15:0] pid_p_goal_0,
+	input [15:0] pid_p_goal_1,
+	input [15:0] pid_p_goal_2,
+	input [15:0] pid_p_goal_3,
+	input [3:0] pid_at_goal,
 
 	output reg [15:0] servo_pwm0_high_new,
 	output reg [15:0] servo_pwm1_high_new,
@@ -65,8 +69,14 @@ module spi(
 	output reg [0:0] dig_sample_new,
 	output reg [0:0] dig_update_new,
 	output reg [7:0] mot_drive_code_new,
-	output reg [4:0] mot_allstop_new);
-//	output reg [0:0] bemf_calib_cmd_new);
+	output reg [4:0] mot_allstop_new,
+	output reg [15:0] pid_p_goal_0_new,
+	output reg [15:0] pid_p_goal_1_new,
+	output reg [15:0] pid_p_goal_2_new,
+	output reg [15:0] pid_p_goal_3_new
+	);
+	
+	
 
 	
 	
@@ -161,7 +171,11 @@ module spi(
 					10'd38: 	SPI_OUT_tmp <= {15'd0, dig_update};//SPI_REGr[623:608];
 					10'd39: 	SPI_OUT_tmp <= {8'd0, mot_drive_code};//SPI_REGr[639:624];
 					10'd40: 	SPI_OUT_tmp <= {11'd0, mot_allstop}; //SPI_REGr[655:640];
-					//10'd41:	SPI_OUT_tmp <= {15'd0, bemf_calib_cmd};
+					10'd41:	SPI_OUT_tmp <= pid_p_goal_0;
+					10'd42:	SPI_OUT_tmp <= pid_p_goal_1;
+					10'd43:	SPI_OUT_tmp <= pid_p_goal_2;
+					10'd44:	SPI_OUT_tmp <= pid_p_goal_3;
+					10'd45:	SPI_OUT_tmp <= {12'd0, pid_at_goal};				
 				
 					default: SPI_OUT_tmp <= 16'd0;//SPI_REGr[15:0];
 				endcase
@@ -208,7 +222,10 @@ module spi(
 					dig_update_new 		<= (address == 10'd38) ? byte_data_received[0:0] 	: dig_update;
 					mot_drive_code_new 	<= (address == 10'd39) ? byte_data_received[7:0] 	: mot_drive_code;
 					mot_allstop_new 		<= (address == 10'd40) ? byte_data_received[4:0] 	: mot_allstop;
-					//bemf_calib_cmd_new	<= (address == 10'd41) ? byte_data_received[0:0]	: bemf_calib_cmd;
+					pid_p_goal_0_new		<= (address == 10'd41) ? byte_data_received[15:0]	: pid_p_goal_0;
+					pid_p_goal_1_new		<= (address == 10'd42) ? byte_data_received[15:0]	: pid_p_goal_1;
+					pid_p_goal_2_new		<= (address == 10'd43) ? byte_data_received[15:0]	: pid_p_goal_2;
+					pid_p_goal_3_new		<= (address == 10'd44) ? byte_data_received[15:0]	: pid_p_goal_3;
 		
 				end
 			
