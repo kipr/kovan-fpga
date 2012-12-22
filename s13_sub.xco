@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version 14.2
-# Date: Sat Dec 15 22:35:50 2012
+# Date: Sat Dec 22 20:51:42 2012
 #
 ##############################################################
 #
@@ -55,7 +55,7 @@ CSET c_in=false
 CSET c_out=false
 CSET ce=false
 CSET component_name=s13_sub
-CSET implementation=Fabric
+CSET implementation=DSP48
 CSET latency=0
 CSET latency_configuration=Manual
 CSET out_width=13
@@ -70,4 +70,4 @@ CSET sync_ctrl_priority=Reset_Overrides_Set
 MISC pkg_timestamp=2012-06-22T15:32:25Z
 # END Extra information
 GENERATE
-# CRC: f7287b80
+# CRC: 7c7ff31d

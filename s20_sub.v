@@ -6,17 +6,17 @@
 // /___/  \  /    Vendor: Xilinx
 // \   \   \/     Version: P.28xd
 //  \   \         Application: netgen
-//  /   /         Filename: s13_sub.v
-// /___/   /\     Timestamp: Sat Dec 22 14:52:15 2012
+//  /   /         Filename: s20_sub.v
+// /___/   /\     Timestamp: Sat Dec 22 15:14:04 2012
 // \   \  /  \ 
 //  \___\/\___\
 //             
-// Command	: -w -sim -ofmt verilog /home/josh/got/kovan-fpga/tmp/_cg/s13_sub.ngc /home/josh/got/kovan-fpga/tmp/_cg/s13_sub.v 
+// Command	: -w -sim -ofmt verilog /home/josh/got/kovan-fpga/tmp/_cg/s20_sub.ngc /home/josh/got/kovan-fpga/tmp/_cg/s20_sub.v 
 // Device	: 6slx9csg324-2
-// Input file	: /home/josh/got/kovan-fpga/tmp/_cg/s13_sub.ngc
-// Output file	: /home/josh/got/kovan-fpga/tmp/_cg/s13_sub.v
+// Input file	: /home/josh/got/kovan-fpga/tmp/_cg/s20_sub.ngc
+// Output file	: /home/josh/got/kovan-fpga/tmp/_cg/s20_sub.v
 // # of Modules	: 1
-// Design Name	: s13_sub
+// Design Name	: s20_sub
 // Xilinx        : /opt/Xilinx/14.2/ISE_DS/ISE/
 //             
 // Purpose:    
@@ -33,12 +33,12 @@
 
 `timescale 1 ns/1 ps
 
-module s13_sub (
+module s20_sub (
 a, b, s
 )/* synthesis syn_black_box syn_noprune=1 */;
-  input [12 : 0] a;
-  input [12 : 0] b;
-  output [12 : 0] s;
+  input [19 : 0] a;
+  input [19 : 0] b;
+  output [19 : 0] s;
   
   // synthesis translate_off
   
@@ -92,13 +92,6 @@ a, b, s
   wire \NLW_blk00000003_P<22>_UNCONNECTED ;
   wire \NLW_blk00000003_P<21>_UNCONNECTED ;
   wire \NLW_blk00000003_P<20>_UNCONNECTED ;
-  wire \NLW_blk00000003_P<19>_UNCONNECTED ;
-  wire \NLW_blk00000003_P<18>_UNCONNECTED ;
-  wire \NLW_blk00000003_P<17>_UNCONNECTED ;
-  wire \NLW_blk00000003_P<16>_UNCONNECTED ;
-  wire \NLW_blk00000003_P<15>_UNCONNECTED ;
-  wire \NLW_blk00000003_P<14>_UNCONNECTED ;
-  wire \NLW_blk00000003_P<13>_UNCONNECTED ;
   wire \NLW_blk00000003_PCOUT<47>_UNCONNECTED ;
   wire \NLW_blk00000003_PCOUT<46>_UNCONNECTED ;
   wire \NLW_blk00000003_PCOUT<45>_UNCONNECTED ;
@@ -224,7 +217,7 @@ a, b, s
     .CARRYOUT(NLW_blk00000003_CARRYOUT_UNCONNECTED),
     .RSTA(sig00000001),
     .RSTP(sig00000001),
-    .B({b[12], b[12], b[12], b[12], b[12], b[12], b[11], b[10], b[9], b[8], b[7], b[6], b[5], b[4], b[3], b[2], b[1], b[0]}),
+    .B({b[17], b[16], b[15], b[14], b[13], b[12], b[11], b[10], b[9], b[8], b[7], b[6], b[5], b[4], b[3], b[2], b[1], b[0]}),
     .BCOUT({\NLW_blk00000003_BCOUT<17>_UNCONNECTED , \NLW_blk00000003_BCOUT<16>_UNCONNECTED , \NLW_blk00000003_BCOUT<15>_UNCONNECTED , 
 \NLW_blk00000003_BCOUT<14>_UNCONNECTED , \NLW_blk00000003_BCOUT<13>_UNCONNECTED , \NLW_blk00000003_BCOUT<12>_UNCONNECTED , 
 \NLW_blk00000003_BCOUT<11>_UNCONNECTED , \NLW_blk00000003_BCOUT<10>_UNCONNECTED , \NLW_blk00000003_BCOUT<9>_UNCONNECTED , 
@@ -236,8 +229,8 @@ sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, si
 sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, 
 sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, sig00000001, 
 sig00000001, sig00000001, sig00000001, sig00000001, sig00000001}),
-    .C({a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], 
-a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[12], a[11], a[10], a[9], a[8], a[7], a[6], 
+    .C({a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], 
+a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[19], a[18], a[17], a[16], a[15], a[14], a[13], a[12], a[11], a[10], a[9], a[8], a[7], a[6], 
 a[5], a[4], a[3], a[2], a[1], a[0]}),
     .P({\NLW_blk00000003_P<47>_UNCONNECTED , \NLW_blk00000003_P<46>_UNCONNECTED , \NLW_blk00000003_P<45>_UNCONNECTED , 
 \NLW_blk00000003_P<44>_UNCONNECTED , \NLW_blk00000003_P<43>_UNCONNECTED , \NLW_blk00000003_P<42>_UNCONNECTED , \NLW_blk00000003_P<41>_UNCONNECTED , 
@@ -246,11 +239,10 @@ a[5], a[4], a[3], a[2], a[1], a[0]}),
 \NLW_blk00000003_P<32>_UNCONNECTED , \NLW_blk00000003_P<31>_UNCONNECTED , \NLW_blk00000003_P<30>_UNCONNECTED , \NLW_blk00000003_P<29>_UNCONNECTED , 
 \NLW_blk00000003_P<28>_UNCONNECTED , \NLW_blk00000003_P<27>_UNCONNECTED , \NLW_blk00000003_P<26>_UNCONNECTED , \NLW_blk00000003_P<25>_UNCONNECTED , 
 \NLW_blk00000003_P<24>_UNCONNECTED , \NLW_blk00000003_P<23>_UNCONNECTED , \NLW_blk00000003_P<22>_UNCONNECTED , \NLW_blk00000003_P<21>_UNCONNECTED , 
-\NLW_blk00000003_P<20>_UNCONNECTED , \NLW_blk00000003_P<19>_UNCONNECTED , \NLW_blk00000003_P<18>_UNCONNECTED , \NLW_blk00000003_P<17>_UNCONNECTED , 
-\NLW_blk00000003_P<16>_UNCONNECTED , \NLW_blk00000003_P<15>_UNCONNECTED , \NLW_blk00000003_P<14>_UNCONNECTED , \NLW_blk00000003_P<13>_UNCONNECTED , 
-s[12], s[11], s[10], s[9], s[8], s[7], s[6], s[5], s[4], s[3], s[2], s[1], s[0]}),
+\NLW_blk00000003_P<20>_UNCONNECTED , s[19], s[18], s[17], s[16], s[15], s[14], s[13], s[12], s[11], s[10], s[9], s[8], s[7], s[6], s[5], s[4], s[3], 
+s[2], s[1], s[0]}),
     .OPMODE({sig00000002, sig00000001, sig00000001, sig00000001, sig00000002, sig00000002, sig00000002, sig00000002}),
-    .D({b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12]}),
+    .D({b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19]}),
     .PCOUT({\NLW_blk00000003_PCOUT<47>_UNCONNECTED , \NLW_blk00000003_PCOUT<46>_UNCONNECTED , \NLW_blk00000003_PCOUT<45>_UNCONNECTED , 
 \NLW_blk00000003_PCOUT<44>_UNCONNECTED , \NLW_blk00000003_PCOUT<43>_UNCONNECTED , \NLW_blk00000003_PCOUT<42>_UNCONNECTED , 
 \NLW_blk00000003_PCOUT<41>_UNCONNECTED , \NLW_blk00000003_PCOUT<40>_UNCONNECTED , \NLW_blk00000003_PCOUT<39>_UNCONNECTED , 
@@ -267,7 +259,7 @@ s[12], s[11], s[10], s[9], s[8], s[7], s[6], s[5], s[4], s[3], s[2], s[1], s[0]}
 \NLW_blk00000003_PCOUT<8>_UNCONNECTED , \NLW_blk00000003_PCOUT<7>_UNCONNECTED , \NLW_blk00000003_PCOUT<6>_UNCONNECTED , 
 \NLW_blk00000003_PCOUT<5>_UNCONNECTED , \NLW_blk00000003_PCOUT<4>_UNCONNECTED , \NLW_blk00000003_PCOUT<3>_UNCONNECTED , 
 \NLW_blk00000003_PCOUT<2>_UNCONNECTED , \NLW_blk00000003_PCOUT<1>_UNCONNECTED , \NLW_blk00000003_PCOUT<0>_UNCONNECTED }),
-    .A({b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12], b[12]}),
+    .A({b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[19], b[18]}),
     .M({\NLW_blk00000003_M<35>_UNCONNECTED , \NLW_blk00000003_M<34>_UNCONNECTED , \NLW_blk00000003_M<33>_UNCONNECTED , 
 \NLW_blk00000003_M<32>_UNCONNECTED , \NLW_blk00000003_M<31>_UNCONNECTED , \NLW_blk00000003_M<30>_UNCONNECTED , \NLW_blk00000003_M<29>_UNCONNECTED , 
 \NLW_blk00000003_M<28>_UNCONNECTED , \NLW_blk00000003_M<27>_UNCONNECTED , \NLW_blk00000003_M<26>_UNCONNECTED , \NLW_blk00000003_M<25>_UNCONNECTED , 

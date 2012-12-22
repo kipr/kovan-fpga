@@ -5,10 +5,10 @@ module bemf_update(
     input [9:0] bemf_adc_l,
     input [1:0] mot_sel_in,
     input in_valid,
-    input [21:0] bemf_in,
-	 input [21:0] bemf_calib_in,
+    input [19:0] bemf_in,
+	 input [19:0] bemf_calib_in,
     input clk,
-    output [21:0] bemf_out,
+    output [19:0] bemf_out,
     output [1:0] mot_sel_out,
     output out_valid
     );
@@ -17,19 +17,19 @@ module bemf_update(
 	// subtract the high and low side of the motor
 	reg [9:0] bemf_sub_in_a_r = 10'd0;
 	reg [9:0] bemf_sub_in_b_r = 10'd0;
-	wire [21:0] bemf_sub_out;
-	s22_sub bemf_sub(
-		.a({16'd0, bemf_sub_in_a_r}),
-		.b({16'd0, bemf_sub_in_b_r}),
+	wire [19:0] bemf_sub_out;
+	s20_sub bemf_sub(
+		.a({10'd0, bemf_sub_in_a_r}),
+		.b({10'd0, bemf_sub_in_b_r}),
 		.s(bemf_sub_out)
 	);
 
 
 	// adjust by the calibration amount
-	reg [21:0] calib_sub_in_a_r = 22'd0;
-	reg [21:0] calib_sub_in_b_r = 22'd0;
-	wire [21:0] calib_sub_out;
-	s22_sub calib_sub(
+	reg [19:0] calib_sub_in_a_r = 20'd0;
+	reg [19:0] calib_sub_in_b_r = 20'd0;
+	wire [19:0] calib_sub_out;
+	s20_sub calib_sub(
 		.a(calib_sub_in_a_r),
 		.b(calib_sub_in_b_r),
 		.s(calib_sub_out)
@@ -37,10 +37,10 @@ module bemf_update(
 	
 	
 	// integrate the calibrated back emf readings
-	reg [21:0] bemf_integr_in_a_r = 22'd0;
-	reg [21:0] bemf_integr_in_b_r = 22'd0;
-	wire [21:0] bemf_integr_out;
-	s22_add bemf_integr(
+	reg [19:0] bemf_integr_in_a_r = 20'd0;
+	reg [19:0] bemf_integr_in_b_r = 20'd0;
+	wire [19:0] bemf_integr_out;
+	s20_add bemf_integr(
 		.a(bemf_integr_in_a_r),
 		.b(bemf_integr_in_b_r),
 		.s(bemf_integr_out)
@@ -57,10 +57,10 @@ module bemf_update(
 	reg in_valid_2 = 1'd0;
 	reg in_valid_3 = 1'd0;
 	
-	reg [21:0] bemf_out_r = 22'd0;
+	reg [19:0] bemf_out_r = 20'd0;
 	
-	reg [21:0] bemf_in_0 = 22'd0;
-	reg [21:0] bemf_in_1 = 22'd0;
+	reg [19:0] bemf_in_0 = 20'd0;
+	reg [19:0] bemf_in_1 = 20'd0;
 	
 	always @ (posedge clk) begin
 
@@ -84,10 +84,10 @@ module bemf_update(
 		// pipeline stage 2: subtracted the calibration info
 	
 		// deadbanding
-		if (calib_sub_out[21] == 1'b1)
-			bemf_integr_in_a_r <= (~calib_sub_out > 22'd21) ? calib_sub_out : 22'd0; //negative 
+		if (calib_sub_out[19] == 1'b1)
+			bemf_integr_in_a_r <= (~calib_sub_out > 16'd21) ? calib_sub_out : 20'd0; //negative 
 		else
-			bemf_integr_in_a_r <= (calib_sub_out > 22'd20) ? calib_sub_out : 22'd0; // positive
+			bemf_integr_in_a_r <= (calib_sub_out > 15'd20) ? calib_sub_out : 20'd0; // positive
 
 		//bemf_integr_in_a_r <= calib_sub_out;
 		bemf_integr_in_b_r <= bemf_in_1;

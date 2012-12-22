@@ -312,32 +312,32 @@ module kovan (
    reg [9:0] adc_15_new;
    reg [9:0] adc_16_new;
 	
-	wire [21:0] bemf_0;
-   wire [21:0] bemf_1;
-   wire [21:0] bemf_2;
-   wire [21:0] bemf_3;
+	wire [19:0] bemf_0;
+   wire [19:0] bemf_1;
+   wire [19:0] bemf_2;
+   wire [19:0] bemf_3;
 	
-	reg [21:0] bemf_0_r;
-   reg [21:0] bemf_1_r;
-   reg [21:0] bemf_2_r;
-   reg [21:0] bemf_3_r;
+	reg [19:0] bemf_0_r;
+   reg [19:0] bemf_1_r;
+   reg [19:0] bemf_2_r;
+   reg [19:0] bemf_3_r;
 	
 	
-	reg [21:0] bemf_0_r_208M = 22'd0;
-   reg [21:0] bemf_1_r_208M = 22'd0;
-   reg [21:0] bemf_2_r_208M = 22'd0;
-   reg [21:0] bemf_3_r_208M = 22'd0;
+	reg [19:0] bemf_0_r_208M = 20'd0;
+   reg [19:0] bemf_1_r_208M = 20'd0;
+   reg [19:0] bemf_2_r_208M = 20'd0;
+   reg [19:0] bemf_3_r_208M = 20'd0;
 	
-	reg [21:0] bemf_0_calib = 22'd0;
-   reg [21:0] bemf_1_calib = 22'd0;
-   reg [21:0] bemf_2_calib = 22'd0;
-   reg [21:0] bemf_3_calib = 22'd0;
+	reg [19:0] bemf_0_calib = 20'd0;
+   reg [19:0] bemf_1_calib = 20'd0;
+   reg [19:0] bemf_2_calib = 20'd0;
+   reg [19:0] bemf_3_calib = 20'd0;
 	
 
-	reg [11:0] mot_duty0_old = 12'd0;
-	reg [11:0] mot_duty1_old = 12'd0;
-	reg [11:0] mot_duty2_old = 12'd0;
-	reg [11:0] mot_duty3_old = 12'd0;
+	reg [15:0] mot_duty0_old = 16'd0;
+	reg [15:0] mot_duty1_old = 16'd0;
+	reg [15:0] mot_duty2_old = 16'd0;
+	reg [15:0] mot_duty3_old = 16'd0;
 	
 	reg [23:8] servo_pwm0_old = 16'd0;
 	reg [23:8] servo_pwm1_old = 16'd0;
@@ -345,10 +345,10 @@ module kovan (
 	reg [23:8] servo_pwm3_old = 16'd0;
 	
 	
-	wire [11:0] mot_duty0_new;
-	wire [11:0] mot_duty1_new;
-	wire [11:0] mot_duty2_new;
-	wire [11:0] mot_duty3_new;
+	wire [15:0] mot_duty0_new;
+	wire [15:0] mot_duty1_new;
+	wire [15:0] mot_duty2_new;
+	wire [15:0] mot_duty3_new;
 	
 	wire [23:8] servo_pwm0_new;
 	wire [23:8] servo_pwm1_new;
@@ -368,36 +368,30 @@ module kovan (
 	wire [7:0] dig_pu_new;
 	wire [7:0] dig_oe_new;
 	wire [7:0] ana_pu_new;
-	wire [11:0] mot_duty_0_new;
-	wire [11:0] mot_duty_1_new;
-	wire [11:0] mot_duty_2_new;
-	wire [11:0] mot_duty_3_new;
+	wire [15:0] mot_duty_0_new;
+	wire [15:0] mot_duty_1_new;
+	wire [15:0] mot_duty_2_new;
+	wire [15:0] mot_duty_3_new;
 	wire [0:0] dig_sample_new;
 	wire [0:0] dig_update_new;
 	wire [7:0] mot_drive_code_new;
 	wire [4:0] mot_allstop_new;
 
-/*
-	reg bemf_calib_cmd_old = 1'd0;
-	wire bemf_calib_cmd_new;
-	*/
-	
-	//reg [12:0] pid_pwm0;
-	//reg [12:0] pid_pwm1;
-	//reg [12:0] pid_pwm2;
-	//reg [12:0] pid_pwm3;
-	
-	//  6 assign out = (enable) ? data : 1'bz;
-	//reg using_pid0 = 1'b0;
-	//reg using_pid1 = 1'b0;
-	//reg using_pid2 = 1'b0;
-	//reg using_pid3 = 1'b0;
+	reg [11:0] pid_pwm0 = 12'd0;
+	reg [11:0] pid_pwm1 = 12'd0;
+	reg [11:0] pid_pwm2 = 12'd0;
+	reg [11:0] pid_pwm3 = 12'd0;
+
+	reg pid_dir0 = 1'd0;
+	reg pid_dir1 = 1'd0;
+	reg pid_dir2 = 1'd0;
+	reg pid_dir3 = 1'd0;
 	
 	// TODO: direction, convert to unsigned
-	assign mot_duty0 =  mot_duty0_new; //(using_pid0) ? pid_pwm0[11:0] : mot_duty0_r;
-	assign mot_duty1 =  mot_duty1_new; //(using_pid1) ? pid_pwm1[11:0] : mot_duty1_r;
-	assign mot_duty2 =  mot_duty2_new; //(using_pid2) ? pid_pwm2[11:0] : mot_duty2_r;
-	assign mot_duty3 =  mot_duty3_new; //(using_pid3) ? pid_pwm3[11:0] : mot_duty3_r;
+	assign mot_duty0 =  (mot_duty0_old[15]) ? pid_pwm0[11:0] : mot_duty0_new;
+	assign mot_duty1 =  (mot_duty1_old[15]) ? pid_pwm1[11:0] : mot_duty1_new;
+	assign mot_duty2 =  (mot_duty2_old[15]) ? pid_pwm2[11:0] : mot_duty2_new;
+	assign mot_duty3 =  (mot_duty3_old[15]) ? pid_pwm3[11:0] : mot_duty3_new;
 
 	assign servo0_pwm_pulse = {servo_pwm0_old, 8'd0};
 	assign servo1_pwm_pulse = {servo_pwm1_old, 8'd0};
@@ -410,12 +404,13 @@ module kovan (
 	assign dig_oe = dig_oe_old;
 	assign dig_pu = dig_pu_old;
 	assign ana_pu = ana_pu_old;
-	//assign dig_in_val = dig_in_val_old;
- 	//assign dig_val_good = dig_val_good_old;
-	//assign dig_busy = dig_busy_old;
+	
 	assign dig_sample = dig_sample_old;
 	assign dig_update = dig_update_old;
+	
+	//TODO: motor drive code assignment should consider pid mode
 	assign mot_drive_code = mot_drive_code_old;
+	
 	assign mot_allstop = mot_allstop_old;
 
 
@@ -506,26 +501,15 @@ module kovan (
 	reg [9:0] bemf_adc_l = 10'd0;
 	reg [1:0] bemf_mot_sel_in = 2'd0;
 	reg bemf_in_valid = 1'd0;
-	reg [21:0] bemf_in = 22'd0;
-	reg [21:0] bemf_calib_in = 22'd0;
+	reg [19:0] bemf_in = 20'd0;
+	reg [19:0] bemf_calib_in = 20'd0;
 
 	wire [1:0] bemf_mot_sel_out;
 	wire bemf_out_valid;
-	wire [21:0] bemf_out;
+	wire [19:0] bemf_out;
 
 	reg [15:0] bemf_counter = 16'd0; // can count for up to ~20mS
 	reg [2:0] bemf_state = 3'd0;
-	
-	/*
-	always @(posedge clk3p2M) begin
-	
-		bemf_0_r <= bemf_out + 3'd1;
-		bemf_1_r <= bemf_out + 3'd2;
-		bemf_2_r <= bemf_out + 3'd3;
-		bemf_3_r <= bemf_out + 3'd4;
-	
-	end
-	*/
 	
 
 	always @(posedge clk3p2M) begin
@@ -632,8 +616,8 @@ module kovan (
 		3'd6: begin
 			bemf_in_valid <= 1'd0;
 			
-			if (bemf_counter > 64000) begin// 20mS total
-				bemf_state <= bemf_state + 1'd1;
+			if (bemf_counter < 64000) begin
+				//bemf_state <= bemf_state + 1'd1;
 				bemf_counter <= bemf_counter + 1'd1;
 			end else begin
 				bemf_state <= 3'd0;
@@ -693,10 +677,10 @@ module kovan (
 		.adc_15_in(adc_15_old),
 		.adc_16_in(adc_16_old),
 		.charge_acp_in(CHG_ACP),
-		.bemf_0(bemf_0_r_208M[21:6]),
-	   .bemf_1(bemf_1_r_208M[21:6]),
-		.bemf_2(bemf_2_r_208M[21:6]),
-		.bemf_3(bemf_3_r_208M[21:6]),
+		.bemf_0(bemf_0_r_208M[19:4]),
+	   .bemf_1(bemf_1_r_208M[19:4]),
+		.bemf_2(bemf_2_r_208M[19:4]),
+		.bemf_3(bemf_3_r_208M[19:4]),
 		.servo_pwm0_high(servo_pwm0_old),
 		.servo_pwm1_high(servo_pwm1_old),
 		.servo_pwm2_high(servo_pwm2_old),
@@ -736,18 +720,19 @@ module kovan (
 	);
 
 
-/*
+
+
 	// Inputs
-	reg [12:0] pos_d;
-	reg [12:0] pos;
-	reg [12:0] err_prev;
-	reg [12:0] int_err_prev;
-	reg [12:0] Kp_n;
-	reg [7:0] Kp_d;
-	reg [12:0] Ki_n;
-	reg [7:0] Ki_d;
-	reg [12:0] Kd_n;
-	reg [7:0] Kd_d;
+	reg [12:0] pos_d = 13'd0;
+	reg [12:0] pos = 13'd0;
+	reg [12:0] err_prev = 13'd0;
+	reg [12:0] int_err_prev = 13'd0;
+	reg [12:0] Kp_n = 13'd0;
+	reg [7:0] Kp_d = 13'd0;
+	reg [12:0] Ki_n = 13'd0;
+	reg [7:0] Ki_d = 13'd0;
+	reg [12:0] Kd_n = 13'd0;
+	reg [7:0] Kd_d  = 13'd0;
 
 	// Outputs
 	wire [12:0] pid_pwm;
@@ -773,15 +758,28 @@ module kovan (
 		.int_err(pid_int_err), 
 		.dir(pid_dir)
 	);
-*/
+
+
+
+	always @(posedge clk3p2M) begin
+		pid_pwm0 <= pid_pwm;
+		pid_pwm1 <= pid_pwm;
+		pid_pwm2 <= pid_pwm;
+		pid_pwm3 <= pid_pwm;
+		pid_dir0 <= pid_dir;
+		pid_dir1 <= pid_dir;
+		pid_dir2 <= pid_dir;
+		pid_dir3 <= pid_dir;
+	end
+
 
 	quad_motor motor_controller (
 		.clk(clk26buf),
 		.MOT_EN(!mot_allstop[0]),
-		.duty0(mot_duty0),
-		.duty1(mot_duty1),
-		.duty2(mot_duty2),
-		.duty3(mot_duty3),
+		.duty0(mot_duty0[11:0]),
+		.duty1(mot_duty1[11:0]),
+		.duty2(mot_duty2[11:0]),
+		.duty3(mot_duty3[11:0]),
 		.drive_code(mot_drive_code),
 		.bemf_sensing(bemf_sensing),
 		.pwm(MOT_PWM),
