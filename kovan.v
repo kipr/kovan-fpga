@@ -755,6 +755,19 @@ module kovan (
 	reg [12:0] vel_d;
 	reg [12:0] vel;
 
+	reg [12:0] pid_mot_0_err_prev = 13'd0;
+	reg [12:0] pid_mot_1_err_prev = 13'd0;
+	reg [12:0] pid_mot_2_err_prev = 13'd0;
+	reg [12:0] pid_mot_3_err_prev = 13'd0;
+
+
+	reg [12:0] pid_mot_0_int_err = 13'd0;
+	reg [12:0] pid_mot_1_int_err = 13'd0;
+	reg [12:0] pid_mot_2_int_err = 13'd0;
+	reg [12:0] pid_mot_3_int_err = 13'd0;
+
+
+
 	pid pid_6stage (
 		.vel_d(vel_d),
 		.vel(vel),
@@ -797,6 +810,8 @@ module kovan (
 				vel_d <= mot_duty0_old[12:0];
 				pos <= bemf_0[19:7];
 				pos_d <= pid_p_goal_0_old[12:0];
+				err_prev <= pid_mot_0_err_prev;
+				int_err_prev <= pid_mot_0_int_err;
 				pid_update_state <= pid_update_state + 1'b1;
 			end
 			// state 1: clock in mot 1
@@ -807,6 +822,8 @@ module kovan (
 				vel_d <= mot_duty1_old[12:0];
 				pos <= bemf_1[19:7];
 				pos_d <= pid_p_goal_1_old[12:0];
+				err_prev <= pid_mot_1_err_prev;
+				int_err_prev <= pid_mot_1_int_err;
 				pid_update_state <= pid_update_state + 1'b1;
 			end
 			// state 2: clock in mot 2
@@ -817,6 +834,8 @@ module kovan (
 				vel_d <= mot_duty2_old[12:0];
 				pos <= bemf_2[19:7];
 				pos_d <= pid_p_goal_2_old[12:0];
+				err_prev <= pid_mot_2_err_prev;
+				int_err_prev <= pid_mot_2_int_err;
 				pid_update_state <= pid_update_state + 1'b1;
 			end
 			// state 3: clock in mot 3
@@ -827,6 +846,8 @@ module kovan (
 				vel_d <= mot_duty3_old[12:0];
 				pos <= bemf_3[19:7];
 				pos_d <= pid_p_goal_3_old[12:0];
+				err_prev <= pid_mot_3_err_prev;
+				int_err_prev <= pid_mot_3_int_err;
 				pid_update_state <= pid_update_state + 1'b1;
 			end
 			// state 4: wait for updates
@@ -839,21 +860,29 @@ module kovan (
 						//TODO: err, vel out?
 						pid_drive_code_0 <= pid_drive_code;
 						pid_pwm0 <= pid_pwm;
+						pid_mot_0_err_prev <= pid_err;
+						pid_mot_0_int_err <= pid_int_err;
 						pid_update_state <= 3'd4;
 					end
 					2'd1: begin
 						pid_drive_code_1 <= pid_drive_code;
 						pid_pwm1 <= pid_pwm;
+						pid_mot_1_err_prev <= pid_err;
+						pid_mot_1_int_err <= pid_int_err;
 						pid_update_state <= 3'd4;
 					end
 					2'd2: begin
 						pid_drive_code_2 <= pid_drive_code;
 						pid_pwm2 <= pid_pwm;
+						pid_mot_2_err_prev <= pid_err;
+						pid_mot_2_int_err <= pid_int_err;
 						pid_update_state <= 3'd4;
 					end
 					2'd3: begin
 						pid_drive_code_3 <= pid_drive_code;
 						pid_pwm3 <= pid_pwm;
+						pid_mot_3_err_prev <= pid_err;
+						pid_mot_3_int_err <= pid_int_err;
 						pid_update_state <= 3'd0;
 					end
 					endcase

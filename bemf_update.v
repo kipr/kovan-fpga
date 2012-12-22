@@ -64,7 +64,7 @@ module bemf_update(
 	reg [19:0] bemf_in_1 = 20'd0;
 	
 	
-	reg vel_out_3 = 20'd0;
+	reg [19:0] vel_out_3 = 20'd0;
 	
 	always @ (posedge clk) begin
 
