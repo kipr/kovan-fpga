@@ -338,42 +338,16 @@ module kovan (
 	wire [7:0] dig_pu_new;
 	wire [7:0] dig_oe_new;
 	wire [7:0] ana_pu_new;
-	wire [15:0] mot_duty_0_new;
-	wire [15:0] mot_duty_1_new;
-	wire [15:0] mot_duty_2_new;
-	wire [15:0] mot_duty_3_new;
 	wire [0:0] dig_sample_new;
 	wire [0:0] dig_update_new;
 	wire [7:0] mot_drive_code_new;
 	wire [4:0] mot_allstop_new;
 
-	reg [11:0] pid_pwm0 = 12'd0;
-	reg [11:0] pid_pwm1 = 12'd0;
-	reg [11:0] pid_pwm2 = 12'd0;
-	reg [11:0] pid_pwm3 = 12'd0;
 
-	reg [1:0] pid_drive_code_0 = 2'd0;
-	reg [1:0] pid_drive_code_1 = 2'd0;
-	reg [1:0] pid_drive_code_2 = 2'd0;
-	reg [1:0] pid_drive_code_3 = 2'd0;
-
-	wire [15:0] pid_p_goal_0_new;
-	wire [15:0] pid_p_goal_1_new;
-	wire [15:0] pid_p_goal_2_new;
-	wire [15:0] pid_p_goal_3_new;
-	
-	
-	reg [15:0] pid_p_goal_0_old = 16'd0;
-	reg [15:0] pid_p_goal_1_old = 16'd0;
-	reg [15:0] pid_p_goal_2_old = 16'd0;
-	reg [15:0] pid_p_goal_3_old = 16'd0;
-	
-	
-	// TODO: direction, convert to unsigned
-	assign mot_duty0 =  (mot_duty0_old[15]) ? pid_pwm0[11:0] : mot_duty0_new[11:0];
-	assign mot_duty1 =  (mot_duty1_old[15]) ? pid_pwm1[11:0] : mot_duty1_new[11:0];
-	assign mot_duty2 =  (mot_duty2_old[15]) ? pid_pwm2[11:0] : mot_duty2_new[11:0];
-	assign mot_duty3 =  (mot_duty3_old[15]) ? pid_pwm3[11:0] : mot_duty3_new[11:0];
+	assign mot_duty0 = mot_duty0_new;
+	assign mot_duty1 = mot_duty1_new;
+	assign mot_duty2 = mot_duty2_new;
+	assign mot_duty3 = mot_duty3_new;
 
 	assign servo0_pwm_pulse = {servo_pwm0_old, 8'd0};
 	assign servo1_pwm_pulse = {servo_pwm1_old, 8'd0};
@@ -390,16 +364,13 @@ module kovan (
 	assign dig_sample = dig_sample_old;
 	assign dig_update = dig_update_old;
 	
-	assign mot_drive_code[7:6] = (mot_duty0_old[15]) ? pid_drive_code_0 : mot_drive_code_old[7:6];
-	assign mot_drive_code[5:4] = (mot_duty1_old[15]) ? pid_drive_code_1 : mot_drive_code_old[5:4];
-	assign mot_drive_code[3:2] = (mot_duty2_old[15]) ? pid_drive_code_2 : mot_drive_code_old[3:2];
-	assign mot_drive_code[1:0] = (mot_duty3_old[15]) ? pid_drive_code_3 : mot_drive_code_old[1:0];
+	
+	assign mot_drive_code[7:6] = mot_drive_code_old[7:6];
+	assign mot_drive_code[5:4] = mot_drive_code_old[5:4];
+	assign mot_drive_code[3:2] = mot_drive_code_old[3:2];
+	assign mot_drive_code[1:0] = mot_drive_code_old[1:0];
 	
 	assign mot_allstop = mot_allstop_old;
-
-	reg [3:0] pid_at_goal = 4'd0;
-	reg [3:0] pid_at_goal_old = 4'd0;
-
 
 	assign bemf_0 = bemf_0_r_208M;
 	assign bemf_1 = bemf_1_r_208M;
@@ -476,12 +447,7 @@ module kovan (
 		
 		dig_in_val_new <= dig_in_val;
 		dig_in_val_old <= dig_in_val_new;
-		
-		pid_at_goal_old <= pid_at_goal;
-		pid_p_goal_0_old <= pid_p_goal_0_new;
-		pid_p_goal_1_old <= pid_p_goal_1_new;
-		pid_p_goal_2_old <= pid_p_goal_2_new;
-		pid_p_goal_3_old <= pid_p_goal_3_new;
+
 	end
 
 
@@ -698,12 +664,7 @@ module kovan (
 		.dig_update(dig_update_old),
 		.mot_drive_code(mot_drive_code_old),
 		.mot_allstop(mot_allstop_old),
-		.pid_p_goal_0(pid_p_goal_0_old),
-		.pid_p_goal_1(pid_p_goal_1_old),
-		.pid_p_goal_2(pid_p_goal_2_old),
-		.pid_p_goal_3(pid_p_goal_3_old),
-		.pid_at_goal(pid_at_goal_old),
-		
+
 		.servo_pwm0_high_new(servo_pwm0_new),
 		.servo_pwm1_high_new(servo_pwm1_new),
 		.servo_pwm2_high_new(servo_pwm2_new),
@@ -719,183 +680,8 @@ module kovan (
 		.dig_sample_new(dig_sample_new),
 		.dig_update_new(dig_update_new),
 		.mot_drive_code_new(mot_drive_code_new),
-		.mot_allstop_new(mot_allstop_new),
-		.pid_p_goal_0_new(pid_p_goal_0_new),
-		.pid_p_goal_1_new(pid_p_goal_1_new),
-		.pid_p_goal_2_new(pid_p_goal_2_new),
-		.pid_p_goal_3_new(pid_p_goal_3_new)
+		.mot_allstop_new(mot_allstop_new)
 	);
-
-
-
-
-	// Inputs
-	reg [12:0] pos_d = 13'd0;
-	reg [12:0] pos = 13'd0;
-	reg [12:0] err_prev = 13'd0;
-	reg [12:0] int_err_prev = 13'd0;
-	reg [12:0] Kp_n = 13'd10;
-	reg [7:0] Kp_d = 8'd0;
-	reg [12:0] Ki_n = 13'd0;
-	reg [7:0] Ki_d = 8'd0;
-	reg [12:0] Kd_n = 13'd0;
-	reg [7:0] Kd_d  = 8'd0;
-	
-	reg [1:0] pid_motor_id_in = 2'd0; 
-	reg pid_in_valid = 1'd0;
-
-	// Outputs
-	wire [11:0] pid_pwm;
-	wire [12:0] pid_err;
-	wire [12:0] pid_int_err;
-	wire [1:0] pid_drive_code;
-	wire [1:0] pid_motor_id_out;
-	wire pid_out_valid;
-	
-	reg [12:0] vel_d;
-	reg [12:0] vel;
-
-	reg [12:0] pid_mot_0_err_prev = 13'd0;
-	reg [12:0] pid_mot_1_err_prev = 13'd0;
-	reg [12:0] pid_mot_2_err_prev = 13'd0;
-	reg [12:0] pid_mot_3_err_prev = 13'd0;
-
-
-	reg [12:0] pid_mot_0_int_err = 13'd0;
-	reg [12:0] pid_mot_1_int_err = 13'd0;
-	reg [12:0] pid_mot_2_int_err = 13'd0;
-	reg [12:0] pid_mot_3_int_err = 13'd0;
-
-
-
-	pid pid_6stage (
-		.vel_d(vel_d),
-		.vel(vel),
-		.pos_d(pos_d), 
-		.pos(pos), 
-		.err_prev(err_prev), 
-		.int_err_prev(int_err_prev), 
-		.Kp_n(Kp_n), 
-		.Kp_d(Kp_d), 
-		.Ki_n(Ki_n), 
-		.Ki_d(Ki_d), 
-		.Kd_n(Kd_n), 
-		.Kd_d(Kd_d), 	 
-		.pid_motor_id_in(pid_motor_id_in),
-		.pid_in_valid(pid_in_valid),
-		.clk(clk3p2M), 
-		.pwm(pid_pwm), 
-		.err(pid_err), 
-		.int_err(pid_int_err), 
-		.drive_code(pid_drive_code),
-		.pid_motor_id_out(pid_motor_id_out),
-		.pid_out_valid(pid_out_valid)
-	);
-
-	reg [2:0] pid_update_state = 3'd0;
-
-	always @(posedge clk3p2M) begin
-	
-		pid_at_goal[0] <= pid_drive_code_0 == 2'b00;
-		pid_at_goal[1] <= pid_drive_code_1 == 2'b00;
-		pid_at_goal[2] <= pid_drive_code_2 == 2'b00;
-		pid_at_goal[3] <= pid_drive_code_3 == 2'b00;
-		
-		case(pid_update_state)
-			// state 0: clock in mot 0
-			3'd0: begin
-				pid_in_valid <= 1'b1;
-				pid_motor_id_in <= 2'd0;
-				vel <= vel_mot_0[19:7];
-				vel_d <= mot_duty0_old[12:0];
-				pos <= bemf_0[19:7];
-				pos_d <= pid_p_goal_0_old[12:0];
-				err_prev <= pid_mot_0_err_prev;
-				int_err_prev <= pid_mot_0_int_err;
-				pid_update_state <= pid_update_state + 1'b1;
-			end
-			// state 1: clock in mot 1
-			3'd1: begin
-				pid_in_valid <= 1'b1;
-				pid_motor_id_in <= 2'd1;
-				vel <= vel_mot_1[19:7];
-				vel_d <= mot_duty1_old[12:0];
-				pos <= bemf_1[19:7];
-				pos_d <= pid_p_goal_1_old[12:0];
-				err_prev <= pid_mot_1_err_prev;
-				int_err_prev <= pid_mot_1_int_err;
-				pid_update_state <= pid_update_state + 1'b1;
-			end
-			// state 2: clock in mot 2
-			3'd2: begin
-				pid_in_valid <= 1'b1;
-				pid_motor_id_in <= 2'd2;
-				vel <= vel_mot_2[19:7];
-				vel_d <= mot_duty2_old[12:0];
-				pos <= bemf_2[19:7];
-				pos_d <= pid_p_goal_2_old[12:0];
-				err_prev <= pid_mot_2_err_prev;
-				int_err_prev <= pid_mot_2_int_err;
-				pid_update_state <= pid_update_state + 1'b1;
-			end
-			// state 3: clock in mot 3
-			3'd3: begin
-				pid_in_valid <= 1'b1;
-				pid_motor_id_in <= 2'd3;
-				vel <= vel_mot_3[19:7];
-				vel_d <= mot_duty3_old[12:0];
-				pos <= bemf_3[19:7];
-				pos_d <= pid_p_goal_3_old[12:0];
-				err_prev <= pid_mot_3_err_prev;
-				int_err_prev <= pid_mot_3_int_err;
-				pid_update_state <= pid_update_state + 1'b1;
-			end
-			// state 4: wait for updates
-			3'd4: begin
-				pid_in_valid <= 1'b0;
-				
-				if (pid_out_valid) begin
-					case(pid_motor_id_out)
-					2'd0: begin
-						//TODO: err, vel out?
-						pid_drive_code_0 <= pid_drive_code;
-						pid_pwm0 <= pid_pwm;
-						pid_mot_0_err_prev <= pid_err;
-						pid_mot_0_int_err <= pid_int_err;
-						pid_update_state <= 3'd4;
-					end
-					2'd1: begin
-						pid_drive_code_1 <= pid_drive_code;
-						pid_pwm1 <= pid_pwm;
-						pid_mot_1_err_prev <= pid_err;
-						pid_mot_1_int_err <= pid_int_err;
-						pid_update_state <= 3'd4;
-					end
-					2'd2: begin
-						pid_drive_code_2 <= pid_drive_code;
-						pid_pwm2 <= pid_pwm;
-						pid_mot_2_err_prev <= pid_err;
-						pid_mot_2_int_err <= pid_int_err;
-						pid_update_state <= 3'd4;
-					end
-					2'd3: begin
-						pid_drive_code_3 <= pid_drive_code;
-						pid_pwm3 <= pid_pwm;
-						pid_mot_3_err_prev <= pid_err;
-						pid_mot_3_int_err <= pid_int_err;
-						pid_update_state <= 3'd0;
-					end
-					endcase
-				end
-			end
-			// default: go to state 0
-			default: begin
-				pid_in_valid <= 1'b0;
-				pid_update_state <= 3'd0; 
-			end
-		endcase
-	end
-
 
 	quad_motor motor_controller (
 		.clk(clk26buf),

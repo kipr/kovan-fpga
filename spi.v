@@ -40,20 +40,21 @@ module spi(
 	input [7:0] dig_pu,
 	input [7:0] dig_oe,
 	input [7:0] ana_pu,
-	input [11:0] mot_duty0,
-	input [11:0] mot_duty1,
-	input [11:0] mot_duty2,
-	input [11:0] mot_duty3,
+	input [15:0] mot_duty0,
+	input [15:0] mot_duty1,
+	input [15:0] mot_duty2,
+	input [15:0] mot_duty3,
 	input [0:0] dig_sample,
 	input [0:0] dig_update,
 	input [7:0] mot_drive_code,
 	input [4:0] mot_allstop,
+	/*
 	input [15:0] pid_p_goal_0,
 	input [15:0] pid_p_goal_1,
 	input [15:0] pid_p_goal_2,
 	input [15:0] pid_p_goal_3,
 	input [3:0] pid_at_goal,
-
+*/
 	output reg [15:0] servo_pwm0_high_new,
 	output reg [15:0] servo_pwm1_high_new,
 	output reg [15:0] servo_pwm2_high_new,
@@ -62,18 +63,20 @@ module spi(
 	output reg [7:0] dig_pu_new,
 	output reg [7:0] dig_oe_new,
 	output reg [7:0] ana_pu_new,
-	output reg [11:0] mot_duty0_new,
-	output reg [11:0] mot_duty1_new,
-	output reg [11:0] mot_duty2_new,
-	output reg [11:0] mot_duty3_new,
+	output reg [15:0] mot_duty0_new,
+	output reg [15:0] mot_duty1_new,
+	output reg [15:0] mot_duty2_new,
+	output reg [15:0] mot_duty3_new,
 	output reg [0:0] dig_sample_new,
 	output reg [0:0] dig_update_new,
 	output reg [7:0] mot_drive_code_new,
-	output reg [4:0] mot_allstop_new,
+	output reg [4:0] mot_allstop_new
+	/*
 	output reg [15:0] pid_p_goal_0_new,
 	output reg [15:0] pid_p_goal_1_new,
 	output reg [15:0] pid_p_goal_2_new,
 	output reg [15:0] pid_p_goal_3_new
+	*/
 	);
 	
 	
@@ -163,19 +166,19 @@ module spi(
 					10'd30: 	SPI_OUT_tmp <= {8'd0, dig_pu};//SPI_REGr[495:480];
 					10'd31: 	SPI_OUT_tmp <= {8'd0, dig_oe};//SPI_REGr[511:496];
 					10'd32: 	SPI_OUT_tmp <= {8'd0, ana_pu};//SPI_REGr[527:512];
-					10'd33: 	SPI_OUT_tmp <= {4'd0, mot_duty0};//SPI_REGr[543:528];
-					10'd34: 	SPI_OUT_tmp <= {4'd0, mot_duty1};//SPI_REGr[559:544];
-					10'd35: 	SPI_OUT_tmp <= {4'd0, mot_duty2};//SPI_REGr[575:560];
-					10'd36: 	SPI_OUT_tmp <= {4'd0, mot_duty3};//SPI_REGr[591:576];
+					10'd33: 	SPI_OUT_tmp <= mot_duty0;//SPI_REGr[543:528];
+					10'd34: 	SPI_OUT_tmp <= mot_duty1;//SPI_REGr[559:544];
+					10'd35: 	SPI_OUT_tmp <= mot_duty2;//SPI_REGr[575:560];
+					10'd36: 	SPI_OUT_tmp <= mot_duty3;//SPI_REGr[591:576];
 					10'd37: 	SPI_OUT_tmp <= {15'd0, dig_sample};//SPI_REGr[607:592];
 					10'd38: 	SPI_OUT_tmp <= {15'd0, dig_update};//SPI_REGr[623:608];
 					10'd39: 	SPI_OUT_tmp <= {8'd0, mot_drive_code};//SPI_REGr[639:624];
 					10'd40: 	SPI_OUT_tmp <= {11'd0, mot_allstop}; //SPI_REGr[655:640];
-					10'd41:	SPI_OUT_tmp <= pid_p_goal_0;
-					10'd42:	SPI_OUT_tmp <= pid_p_goal_1;
-					10'd43:	SPI_OUT_tmp <= pid_p_goal_2;
-					10'd44:	SPI_OUT_tmp <= pid_p_goal_3;
-					10'd45:	SPI_OUT_tmp <= {12'd0, pid_at_goal};				
+					//10'd41:	SPI_OUT_tmp <= pid_p_goal_0;
+					//10'd42:	SPI_OUT_tmp <= pid_p_goal_1;
+					//10'd43:	SPI_OUT_tmp <= pid_p_goal_2;
+					//10'd44:	SPI_OUT_tmp <= pid_p_goal_3;
+					//10'd45:	SPI_OUT_tmp <= {12'd0, pid_at_goal};				
 				
 					default: SPI_OUT_tmp <= 16'd0;//SPI_REGr[15:0];
 				endcase
@@ -214,18 +217,18 @@ module spi(
 					dig_pu_new 				<= (address == 10'd30) ? byte_data_received[7:0] 	: dig_pu;
 					dig_oe_new				<= (address == 10'd31) ? byte_data_received[7:0] 	: dig_oe;
 					ana_pu_new 				<= (address == 10'd32) ? byte_data_received[7:0] 	: ana_pu;
-					mot_duty0_new 			<= (address == 10'd33) ? byte_data_received[11:0] 	: mot_duty0; 
-					mot_duty1_new 			<= (address == 10'd34) ? byte_data_received[11:0] 	: mot_duty1;
-					mot_duty2_new 			<= (address == 10'd35) ? byte_data_received[11:0] 	: mot_duty2;
-					mot_duty3_new 			<= (address == 10'd36) ? byte_data_received[11:0] 	: mot_duty3;
+					mot_duty0_new 			<= (address == 10'd33) ? byte_data_received[15:0] 	: mot_duty0; 
+					mot_duty1_new 			<= (address == 10'd34) ? byte_data_received[15:0] 	: mot_duty1;
+					mot_duty2_new 			<= (address == 10'd35) ? byte_data_received[15:0] 	: mot_duty2;
+					mot_duty3_new 			<= (address == 10'd36) ? byte_data_received[15:0] 	: mot_duty3;
 					dig_sample_new 		<= (address == 10'd37) ? byte_data_received[0:0] 	: dig_sample;
 					dig_update_new 		<= (address == 10'd38) ? byte_data_received[0:0] 	: dig_update;
 					mot_drive_code_new 	<= (address == 10'd39) ? byte_data_received[7:0] 	: mot_drive_code;
 					mot_allstop_new 		<= (address == 10'd40) ? byte_data_received[4:0] 	: mot_allstop;
-					pid_p_goal_0_new		<= (address == 10'd41) ? byte_data_received[15:0]	: pid_p_goal_0;
-					pid_p_goal_1_new		<= (address == 10'd42) ? byte_data_received[15:0]	: pid_p_goal_1;
-					pid_p_goal_2_new		<= (address == 10'd43) ? byte_data_received[15:0]	: pid_p_goal_2;
-					pid_p_goal_3_new		<= (address == 10'd44) ? byte_data_received[15:0]	: pid_p_goal_3;
+					//pid_p_goal_0_new		<= (address == 10'd41) ? byte_data_received[15:0]	: pid_p_goal_0;
+					//pid_p_goal_1_new		<= (address == 10'd42) ? byte_data_received[15:0]	: pid_p_goal_1;
+					//pid_p_goal_2_new		<= (address == 10'd43) ? byte_data_received[15:0]	: pid_p_goal_2;
+					//pid_p_goal_3_new		<= (address == 10'd44) ? byte_data_received[15:0]	: pid_p_goal_3;
 		
 				end
 			
