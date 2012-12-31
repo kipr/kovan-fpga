@@ -48,6 +48,7 @@ module spi(
 	//input [0:0] dig_update,
 	input [7:0] mot_drive_code,
 	input [4:0] mot_allstop,
+	input [0:0] side_button,
 	/*
 	input [15:0] pid_p_goal_0,
 	input [15:0] pid_p_goal_1,
@@ -178,6 +179,7 @@ module spi(
 					10'd42:	SPI_OUT_tmp <= bemf_1[31:16];
 					10'd43:	SPI_OUT_tmp <= bemf_2[31:16];
 					10'd44:	SPI_OUT_tmp <= bemf_3[31:16];
+					10'd45:	SPI_OUT_tmp <= {15'd0, side_button};
 					//10'd41:	SPI_OUT_tmp <= pid_p_goal_0;
 					//10'd42:	SPI_OUT_tmp <= pid_p_goal_1;
 					//10'd43:	SPI_OUT_tmp <= pid_p_goal_2;

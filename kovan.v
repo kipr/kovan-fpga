@@ -31,6 +31,8 @@
 
 module kovan (
 
+	input wire INPUT_SW0,
+
 	// power management
 	input wire CHG_ACP,           	// reports presence of AC power
 	//output wire CHG_SHDN,         // leave floating
@@ -381,7 +383,13 @@ module kovan (
 	reg bemf_sensing_r = 1'd0;
 	assign bemf_sensing = bemf_sensing_r;
 
+	reg side_button_new = 1'd0;
+	reg side_button_old = 1'd0;
+
 	always @ (posedge clk208M) begin
+		side_button_new <= INPUT_SW0;
+		
+		side_button_old <= side_button_new;
 		
 		mot_duty0_old <= mot_duty0_new;
 		mot_duty1_old <= mot_duty1_new;
@@ -664,6 +672,7 @@ module kovan (
 		//.dig_update(dig_update_old),
 		.mot_drive_code(mot_drive_code_old),
 		.mot_allstop(mot_allstop_old),
+		.side_button(side_button_old),
 
 		.servo_pwm0_high_new(servo_pwm0_new),
 		.servo_pwm1_high_new(servo_pwm1_new),
