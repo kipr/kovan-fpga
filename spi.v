@@ -28,10 +28,10 @@ module spi(
 	input [9:0] adc_15_in,
 	input [9:0] adc_16_in,
 	input [0:0] charge_acp_in,
-	input [15:0] bemf_0,
-	input [15:0] bemf_1,
-	input [15:0] bemf_2,
-	input [15:0] bemf_3,
+	input [31:0] bemf_0,
+	input [31:0] bemf_1,
+	input [31:0] bemf_2,
+	input [31:0] bemf_3,
 	input [15:0] servo_pwm0_high,
 	input [15:0] servo_pwm1_high,
 	input [15:0] servo_pwm2_high,
@@ -153,10 +153,10 @@ module spi(
 					10'd17: 	SPI_OUT_tmp <= {6'd0, adc_15_in[9:0]};//SPI_REGr[287:272];
 					10'd18: 	SPI_OUT_tmp <= {6'd0, adc_16_in[9:0]};//SPI_REGr[303:288];
 					10'd19:	SPI_OUT_tmp <= {15'd0, charge_acp_in};//10'd19: 	[319:304];
-					10'd20:	SPI_OUT_tmp <= bemf_0;//10'd20: 	SPI_OUTr <= SPI_REGr[335:320];
-					10'd21:	SPI_OUT_tmp <= bemf_1;//10'd21: 	SPI_OUTr <= SPI_REGr[351:336];
-					10'd22:	SPI_OUT_tmp <= bemf_2;//10'd22: 	SPI_OUTr <= SPI_REGr[367:352];
-					10'd23:	SPI_OUT_tmp <= bemf_3;//10'd23: 	SPI_OUTr <= SPI_REGr[383:368];
+					10'd20:	SPI_OUT_tmp <= bemf_0[15:0];//10'd20: 	SPI_OUTr <= SPI_REGr[335:320];
+					10'd21:	SPI_OUT_tmp <= bemf_1[15:0];//10'd21: 	SPI_OUTr <= SPI_REGr[351:336];
+					10'd22:	SPI_OUT_tmp <= bemf_2[15:0];//10'd22: 	SPI_OUTr <= SPI_REGr[367:352];
+					10'd23:	SPI_OUT_tmp <= bemf_3[15:0];//10'd23: 	SPI_OUTr <= SPI_REGr[383:368];
 					//10'd24: 	SPI_OUT_tmp <= SPI_REGr[399:384];
 					10'd25: 	SPI_OUT_tmp <= servo_pwm0_high;//SPI_REGr[415:400];
 					10'd26: 	SPI_OUT_tmp <= servo_pwm1_high;//SPI_REGr[431:416];
@@ -174,6 +174,10 @@ module spi(
 					10'd38: 	SPI_OUT_tmp <= {15'd0, dig_update};//SPI_REGr[623:608];
 					10'd39: 	SPI_OUT_tmp <= {8'd0, mot_drive_code};//SPI_REGr[639:624];
 					10'd40: 	SPI_OUT_tmp <= {11'd0, mot_allstop}; //SPI_REGr[655:640];
+					10'd41:	SPI_OUT_tmp <= bemf_0[31:16];
+					10'd42:	SPI_OUT_tmp <= bemf_1[31:16];
+					10'd43:	SPI_OUT_tmp <= bemf_2[31:16];
+					10'd44:	SPI_OUT_tmp <= bemf_3[31:16];
 					//10'd41:	SPI_OUT_tmp <= pid_p_goal_0;
 					//10'd42:	SPI_OUT_tmp <= pid_p_goal_1;
 					//10'd43:	SPI_OUT_tmp <= pid_p_goal_2;
