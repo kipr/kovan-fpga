@@ -338,8 +338,8 @@ module kovan (
 	wire [7:0] dig_pu_new;
 	wire [7:0] dig_oe_new;
 	wire [7:0] ana_pu_new;
-	wire [0:0] dig_sample_new;
-	wire [0:0] dig_update_new;
+	reg [0:0] dig_sample_new;
+	reg [0:0] dig_update_new;
 	wire [7:0] mot_drive_code_new;
 	wire [4:0] mot_allstop_new;
 
@@ -660,8 +660,8 @@ module kovan (
 		.mot_duty1(mot_duty1_old),
 		.mot_duty2(mot_duty2_old),
 		.mot_duty3(mot_duty3_old),
-		.dig_sample(dig_sample_old),
-		.dig_update(dig_update_old),
+		//.dig_sample(dig_sample_old),
+		//.dig_update(dig_update_old),
 		.mot_drive_code(mot_drive_code_old),
 		.mot_allstop(mot_allstop_old),
 
@@ -677,8 +677,8 @@ module kovan (
 		.mot_duty1_new(mot_duty1_new),
 		.mot_duty2_new(mot_duty2_new),
 		.mot_duty3_new(mot_duty3_new),
-		.dig_sample_new(dig_sample_new),
-		.dig_update_new(dig_update_new),
+		//.dig_sample_new(dig_sample_new),
+		//.dig_update_new(dig_update_new),
 		.mot_drive_code_new(mot_drive_code_new),
 		.mot_allstop_new(mot_allstop_new)
 	);
@@ -765,6 +765,66 @@ module kovan (
 	assign M_SERVO[2] = mot_allstop[3] & !m_servo_out[2];
 	assign M_SERVO[3] = mot_allstop[4] & !m_servo_out[3];
 
+	
+	
+	reg [2:0] dig_update_state = 2'd0; 
+	reg [11:0] dig_update_counter = 16'd0;
+	
+	always @(posedge clk3p2M) begin
+	
+		case(dig_update_state)
+			// update = 1
+			2'd0: begin
+				if (dig_update_counter > 200) begin
+					dig_update_state <= dig_update_state + 2'd1;
+				end else begin
+					dig_update_state <= dig_update_state;
+				end
+				
+				dig_update_new <= 1'd1;
+				dig_update_counter <= dig_update_counter + 12'd1;
+			end
+			
+			// update = 0
+			2'd1: begin
+				if (dig_update_counter > 300) begin
+					dig_update_state <= dig_update_state + 2'd1;
+				end else begin
+					dig_update_state <= dig_update_state;				
+				end
+				dig_update_new <= 1'd0;
+				dig_update_counter <= dig_update_counter + 12'd1;
+			end
+			
+			// sample = 0
+			2'd2: begin
+				if (dig_update_counter > 400) begin
+					dig_update_state <= dig_update_state + 2'd1;
+				end else begin
+					dig_update_state <= dig_update_state;				
+				end
+				dig_sample_new <= 1'd0;
+				dig_update_counter <= dig_update_counter + 12'd1;
+			end
+			
+			// sample = 1
+			2'd3: begin
+			
+				if (dig_update_counter > 3200) begin 
+					dig_update_state <= 2'd0;
+					dig_update_counter <= 12'd0;
+				end else begin
+					dig_update_counter <= dig_update_counter + 12'd1;
+					dig_update_state <= 2'd0;
+				end
+				
+				dig_sample_new <= 1'd1;
+			end
+			
+		endcase
+	end
+	
+	
 	
    robot_iface iface(
 		.clk(clk13buf),		
