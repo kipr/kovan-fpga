@@ -91,8 +91,8 @@ NET "M_SERVO[3]" IOSTANDARD = LVCMOS33;
 
 
 ###### pushbutton
-#NET "INPUT_SW0" LOC = B16;
-#NET "INPUT_SW0" IOSTANDARD = LVCMOS33;
+NET "INPUT_SW0" LOC = B16;
+NET "INPUT_SW0" IOSTANDARD = LVCMOS33;
 
 
 ###### audio pass-through interface
