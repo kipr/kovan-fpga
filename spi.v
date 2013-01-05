@@ -40,10 +40,10 @@ module spi(
 	input [7:0] dig_pu,
 	input [7:0] dig_oe,
 	input [7:0] ana_pu,
-	input [15:0] mot_duty0,
-	input [15:0] mot_duty1,
-	input [15:0] mot_duty2,
-	input [15:0] mot_duty3,
+	input [11:0] mot_duty0,
+	input [11:0] mot_duty1,
+	input [11:0] mot_duty2,
+	input [11:0] mot_duty3,
 	//input [0:0] dig_sample,
 	//input [0:0] dig_update,
 	input [7:0] mot_drive_code,
@@ -64,10 +64,10 @@ module spi(
 	output reg [7:0] dig_pu_new,
 	output reg [7:0] dig_oe_new,
 	output reg [7:0] ana_pu_new,
-	output reg [15:0] mot_duty0_new,
-	output reg [15:0] mot_duty1_new,
-	output reg [15:0] mot_duty2_new,
-	output reg [15:0] mot_duty3_new,
+	output reg [11:0] mot_duty0_new,
+	output reg [11:0] mot_duty1_new,
+	output reg [11:0] mot_duty2_new,
+	output reg [11:0] mot_duty3_new,
 	//output reg [0:0] dig_sample_new,
 	//output reg [0:0] dig_update_new,
 	output reg [7:0] mot_drive_code_new,
@@ -168,10 +168,10 @@ module spi(
 					10'd30: 	SPI_OUT_tmp <= {8'd0, dig_pu};//SPI_REGr[495:480];
 					10'd31: 	SPI_OUT_tmp <= {8'd0, dig_oe};//SPI_REGr[511:496];
 					10'd32: 	SPI_OUT_tmp <= {8'd0, ana_pu};//SPI_REGr[527:512];
-					10'd33: 	SPI_OUT_tmp <= mot_duty0;//SPI_REGr[543:528];
-					10'd34: 	SPI_OUT_tmp <= mot_duty1;//SPI_REGr[559:544];
-					10'd35: 	SPI_OUT_tmp <= mot_duty2;//SPI_REGr[575:560];
-					10'd36: 	SPI_OUT_tmp <= mot_duty3;//SPI_REGr[591:576];
+					10'd33: 	SPI_OUT_tmp <= {4'd0, mot_duty0};//SPI_REGr[543:528];
+					10'd34: 	SPI_OUT_tmp <= {4'd0, mot_duty1};//SPI_REGr[559:544];
+					10'd35: 	SPI_OUT_tmp <= {4'd0, mot_duty2};//SPI_REGr[575:560];
+					10'd36: 	SPI_OUT_tmp <= {4'd0, mot_duty3};//SPI_REGr[591:576];
 					//10'd37: 	SPI_OUT_tmp <= {15'd0, dig_sample};//SPI_REGr[607:592];
 					//10'd38: 	SPI_OUT_tmp <= {15'd0, dig_update};//SPI_REGr[623:608];
 					10'd39: 	SPI_OUT_tmp <= {8'd0, mot_drive_code};//SPI_REGr[639:624];
@@ -224,10 +224,10 @@ module spi(
 					dig_pu_new 				<= (address == 10'd30) ? byte_data_received[7:0] 	: dig_pu;
 					dig_oe_new				<= (address == 10'd31) ? byte_data_received[7:0] 	: dig_oe;
 					ana_pu_new 				<= (address == 10'd32) ? byte_data_received[7:0] 	: ana_pu;
-					mot_duty0_new 			<= (address == 10'd33) ? byte_data_received[15:0] 	: mot_duty0; 
-					mot_duty1_new 			<= (address == 10'd34) ? byte_data_received[15:0] 	: mot_duty1;
-					mot_duty2_new 			<= (address == 10'd35) ? byte_data_received[15:0] 	: mot_duty2;
-					mot_duty3_new 			<= (address == 10'd36) ? byte_data_received[15:0] 	: mot_duty3;
+					mot_duty0_new 			<= (address == 10'd33) ? byte_data_received[11:0] 	: mot_duty0; 
+					mot_duty1_new 			<= (address == 10'd34) ? byte_data_received[11:0] 	: mot_duty1;
+					mot_duty2_new 			<= (address == 10'd35) ? byte_data_received[11:0] 	: mot_duty2;
+					mot_duty3_new 			<= (address == 10'd36) ? byte_data_received[11:0] 	: mot_duty3;
 					//dig_sample_new 		<= (address == 10'd37) ? byte_data_received[0:0] 	: dig_sample;
 					//dig_update_new 		<= (address == 10'd38) ? byte_data_received[0:0] 	: dig_update;
 					mot_drive_code_new 	<= (address == 10'd39) ? byte_data_received[7:0] 	: mot_drive_code;

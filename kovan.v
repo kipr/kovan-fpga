@@ -307,10 +307,10 @@ module kovan (
    reg [35:0] bemf_3_calib = 36'd0;
 	
 
-	reg [35:0] mot_duty0_old = 36'd0;
-	reg [35:0] mot_duty1_old = 36'd0;
-	reg [35:0] mot_duty2_old = 36'd0;
-	reg [35:0] mot_duty3_old = 36'd0;
+	reg [11:0] mot_duty0_old = 12'd0;
+	reg [11:0] mot_duty1_old = 12'd0;
+	reg [11:0] mot_duty2_old = 12'd0;
+	reg [11:0] mot_duty3_old = 12'd0;
 	
 	reg [23:8] servo_pwm0_old = 16'd0;
 	reg [23:8] servo_pwm1_old = 16'd0;
@@ -318,10 +318,10 @@ module kovan (
 	reg [23:8] servo_pwm3_old = 16'd0;
 	
 	
-	wire [15:0] mot_duty0_new;
-	wire [15:0] mot_duty1_new;
-	wire [15:0] mot_duty2_new;
-	wire [15:0] mot_duty3_new;
+	wire [11:0] mot_duty0_new;
+	wire [11:0] mot_duty1_new;
+	wire [11:0] mot_duty2_new;
+	wire [11:0] mot_duty3_new;
 	
 	wire [23:8] servo_pwm0_new;
 	wire [23:8] servo_pwm1_new;
