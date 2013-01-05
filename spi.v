@@ -71,7 +71,8 @@ module spi(
 	//output reg [0:0] dig_sample_new,
 	//output reg [0:0] dig_update_new,
 	output reg [7:0] mot_drive_code_new,
-	output reg [4:0] mot_allstop_new
+	output reg [4:0] mot_allstop_new,
+	output reg [3:0] mot_bemf_clear_new
 	/*
 	output reg [15:0] pid_p_goal_0_new,
 	output reg [15:0] pid_p_goal_1_new,
@@ -235,6 +236,7 @@ module spi(
 					//pid_p_goal_1_new		<= (address == 10'd42) ? byte_data_received[15:0]	: pid_p_goal_1;
 					//pid_p_goal_2_new		<= (address == 10'd43) ? byte_data_received[15:0]	: pid_p_goal_2;
 					//pid_p_goal_3_new		<= (address == 10'd44) ? byte_data_received[15:0]	: pid_p_goal_3;
+					mot_bemf_clear_new	<= (address == 10'd46) ? byte_data_received[3:0] : 4'd0;
 		
 				end
 			

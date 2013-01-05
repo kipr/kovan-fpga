@@ -215,6 +215,7 @@ module kovan (
 
    wire [7:0]  mot_drive_code;
    wire [4:0]  mot_allstop;
+	
 
    wire [23:0] servo_pwm_period;
    wire [23:0] servo0_pwm_pulse;
@@ -385,6 +386,9 @@ module kovan (
 
 	reg side_button_new = 1'd0;
 	reg side_button_old = 1'd0;
+	
+	wire [3:0] mot_bemf_clear_new;
+	reg [3:0] mot_bemf_clear_old = 4'd0;	
 
 	always @ (posedge clk208M) begin
 	
@@ -412,10 +416,10 @@ module kovan (
 		
 		//bemf_calib_cmd_old <= bemf_calib_cmd_new;
 	
-		bemf_0_r_208M <= bemf_0_r;
-		bemf_1_r_208M <= bemf_1_r;
-		bemf_2_r_208M <= bemf_2_r;
-		bemf_3_r_208M <= bemf_3_r;
+		bemf_0_r_208M <= (mot_bemf_clear_old[0]) ? 36'd0 : bemf_0_r;
+		bemf_1_r_208M <= (mot_bemf_clear_old[1]) ? 36'd0 : bemf_1_r;
+		bemf_2_r_208M <= (mot_bemf_clear_old[2]) ? 36'd0 : bemf_2_r;
+		bemf_3_r_208M <= (mot_bemf_clear_old[3]) ? 36'd0 : bemf_3_r;
 		
 		adc_0_new <= adc_0_in;
 		adc_1_new <= adc_1_in;
@@ -455,6 +459,9 @@ module kovan (
 		
 		dig_in_val_new <= dig_in_val;
 		dig_in_val_old <= dig_in_val_new;
+		
+		
+		mot_bemf_clear_old <= mot_bemf_clear_new;
 
 	end
 
@@ -689,7 +696,8 @@ module kovan (
 		//.dig_sample_new(dig_sample_new),
 		//.dig_update_new(dig_update_new),
 		.mot_drive_code_new(mot_drive_code_new),
-		.mot_allstop_new(mot_allstop_new)
+		.mot_allstop_new(mot_allstop_new),
+		.mot_bemf_clear_new(mot_bemf_clear_new)
 	);
 
 	quad_motor motor_controller (
