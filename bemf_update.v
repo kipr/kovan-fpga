@@ -89,9 +89,9 @@ module bemf_update(
 	
 		// deadbanding
 		if (calib_sub_out[35] == 1'b1)
-			bemf_integr_in_a_r <= (~calib_sub_out > 36'd25) ? calib_sub_out : 36'd0; //negative 
+			bemf_integr_in_a_r <= (~calib_sub_out > 36'd51) ? calib_sub_out : 36'd0; //negative 
 		else
-			bemf_integr_in_a_r <= (calib_sub_out > 36'd24) ? calib_sub_out : 36'd0; // positive
+			bemf_integr_in_a_r <= (calib_sub_out > 36'd50) ? calib_sub_out : 36'd0; // positive
 
 		//bemf_integr_in_a_r <= calib_sub_out;
 		bemf_integr_in_b_r <= bemf_in_1;
