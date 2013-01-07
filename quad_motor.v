@@ -50,6 +50,12 @@ module quad_motor(
 	
 	reg pwm_dbg = 1'd0;
 	
+	reg stall_m0 = 1'd0;
+	reg stall_m1 = 1'd0;
+	reg stall_m2 = 1'd0;
+	reg stall_m3 = 1'd0;
+	
+	
 	always @ (posedge clk) begin
 		
 		if (count[16:5] > 12'd2600) begin
@@ -73,17 +79,22 @@ module quad_motor(
 		MTOP_r[3] <= drive_code[1];
 		MBOT_r[3] <= drive_code[0];
 		
-		
-		MTOP_r[0] <= (count[16:5] > duty0) ? 1'd0 : drive_code[7];
-		MBOT_r[0] <= (count[16:5] > duty0) ? 1'd0 : drive_code[6];
-		MTOP_r[1] <= (count[16:5] > duty1) ? 1'd0 : drive_code[5];
-		MBOT_r[1] <= (count[16:5] > duty1) ? 1'd0 : drive_code[4];
-		MTOP_r[2] <= (count[16:5] > duty2) ? 1'd0 : drive_code[3];
-		MBOT_r[2] <= (count[16:5] > duty2) ? 1'd0 : drive_code[2];
-		MTOP_r[3] <= (count[16:5] > duty3) ? 1'd0 : drive_code[1];
-		MBOT_r[3] <= (count[16:5] > duty3) ? 1'd0 : drive_code[0];
+		stall_m0 <= (bemf_sensing || count[16:5] > duty0);
+		stall_m1 <= (bemf_sensing || count[16:5] > duty1);
+		stall_m2 <= (bemf_sensing || count[16:5] > duty2);
+		stall_m3 <= (bemf_sensing || count[16:5] > duty3);
 
-		pwm_r <= MOT_EN &&(active_mot[3] | active_mot[2] | active_mot[1] | active_mot[0]) && ~bemf_sensing; 
+		
+		MTOP_r[0] <= (stall_m0) ? 1'd0 : drive_code[7];
+		MBOT_r[0] <= (stall_m0) ? 1'd0 : drive_code[6];
+		MTOP_r[1] <= (stall_m1) ? 1'd0 : drive_code[5];
+		MBOT_r[1] <= (stall_m1) ? 1'd0 : drive_code[4];
+		MTOP_r[2] <= (stall_m2) ? 1'd0 : drive_code[3];
+		MBOT_r[2] <= (stall_m2) ? 1'd0 : drive_code[2];
+		MTOP_r[3] <= (stall_m3) ? 1'd0 : drive_code[1];
+		MBOT_r[3] <= (stall_m3) ? 1'd0 : drive_code[0];
+
+		pwm_r <= MOT_EN;// &&(active_mot[3] | active_mot[2] | active_mot[1] | active_mot[0]);
 	end
 
 endmodule

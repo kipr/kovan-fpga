@@ -522,7 +522,7 @@ module kovan (
 			bemf_in_valid <= 1'd0;
 			bemf_sensing_r <= 1'd0;
 			
-			if (bemf_counter > 1600) // 0.5mS
+			if (bemf_counter > 3200) // 1mS
 				bemf_state <= bemf_state + 1'd1;
 			else
 				bemf_state <= bemf_state;
@@ -534,7 +534,7 @@ module kovan (
 			bemf_in_valid <= 1'd0;
 			bemf_sensing_r <= 1'd1;
 
-			if (bemf_counter > 9600) // 3mS (if this has probs 3.5 should work)
+			if (bemf_counter > 12800) // 3mS (if this has probs 3.5 should work)
 				bemf_state <= bemf_state + 1'd1;
 			else
 				bemf_state <= bemf_state;

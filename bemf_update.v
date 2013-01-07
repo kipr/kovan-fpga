@@ -66,6 +66,8 @@ module bemf_update(
 	
 	reg [35:0] vel_out_3 = 36'd0;
 	
+	
+	
 	always @ (posedge clk) begin
 
 		// pipeline stage 0: load inputs
@@ -89,9 +91,9 @@ module bemf_update(
 	
 		// deadbanding
 		if (calib_sub_out[35] == 1'b1)
-			bemf_integr_in_a_r <= (~calib_sub_out > 36'd51) ? calib_sub_out : 36'd0; //negative 
+			bemf_integr_in_a_r <= (~calib_sub_out > 36'd11) ? calib_sub_out : 36'd0; //negative 
 		else
-			bemf_integr_in_a_r <= (calib_sub_out > 36'd50) ? calib_sub_out : 36'd0; // positive
+			bemf_integr_in_a_r <= (calib_sub_out > 36'd10) ? calib_sub_out : 36'd0; // positive
 
 		//bemf_integr_in_a_r <= calib_sub_out;
 		bemf_integr_in_b_r <= bemf_in_1;
