@@ -331,7 +331,7 @@ module kovan (
 	reg [7:0] dig_out_val_old = 8'd0;
 	reg [7:0] dig_pu_old = 8'd0;
 	reg [7:0] dig_oe_old = 8'd0;
-	reg [7:0] ana_pu_old = 8'd0;
+	reg [7:0] ana_pu_old = 8'hFF;
 	reg [0:0] dig_sample_old = 1'd0;
 	reg [0:0] dig_update_old = 1'd0;
 	reg [7:0] mot_drive_code_old = 8'd0;

@@ -63,7 +63,7 @@ module spi(
 	output reg [7:0] dig_out_val_new,
 	output reg [7:0] dig_pu_new,
 	output reg [7:0] dig_oe_new,
-	output reg [7:0] ana_pu_new,
+	output reg [7:0] ana_pu_new = 8'hFF,
 	output reg [11:0] mot_duty0_new,
 	output reg [11:0] mot_duty1_new,
 	output reg [11:0] mot_duty2_new,
