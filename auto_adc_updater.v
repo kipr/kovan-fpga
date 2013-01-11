@@ -115,28 +115,28 @@ module auto_adc_updater(
 					adc_timeout <= adc_timeout + 16'h0001;
 					adc_go_r <= 0;
 					if (adc_valid) begin
-
-						case (adc_chan_r[6:2]) 
-							5'd0: adc_0_in_r <= adc_in;
-							5'd1: adc_1_in_r <= adc_in;
-							5'd2: adc_2_in_r <= adc_in;
-							5'd3: adc_3_in_r <= adc_in;
-							5'd4: adc_4_in_r <= adc_in;
-							5'd5: adc_5_in_r <= adc_in;
-							5'd6: adc_6_in_r <= adc_in;
-							5'd7: adc_7_in_r <= adc_in; 
-							5'd8: if (bemf_sensing) adc_8_in_r <= adc_in;
-							5'd9: if (bemf_sensing) adc_9_in_r <= adc_in;
-							5'd10: if (bemf_sensing) adc_10_in_r <= adc_in;
-							5'd11: if (bemf_sensing) adc_11_in_r <= adc_in;
-							5'd12: if (bemf_sensing) adc_12_in_r <= adc_in;
-							5'd13: if (bemf_sensing) adc_13_in_r <= adc_in;
-							5'd14: if (bemf_sensing) adc_14_in_r <= adc_in;
-							5'd15: if (bemf_sensing) adc_15_in_r <= adc_in;
-							5'd16: adc_16_in_r <= adc_in;
-							default:;
-						endcase
-					
+						if (adc_chan_r[1:0] == 2'b11) begin 
+							case (adc_chan_r[6:2]) 
+								5'd0: adc_0_in_r <= adc_in;
+								5'd1: adc_1_in_r <= adc_in;
+								5'd2: adc_2_in_r <= adc_in;
+								5'd3: adc_3_in_r <= adc_in;
+								5'd4: adc_4_in_r <= adc_in;
+								5'd5: adc_5_in_r <= adc_in;
+								5'd6: adc_6_in_r <= adc_in;
+								5'd7: adc_7_in_r <= adc_in; 
+								5'd8: if (bemf_sensing) adc_8_in_r <= adc_in;
+								5'd9: if (bemf_sensing) adc_9_in_r <= adc_in;
+								5'd10: if (bemf_sensing) adc_10_in_r <= adc_in;
+								5'd11: if (bemf_sensing) adc_11_in_r <= adc_in;
+								5'd12: if (bemf_sensing) adc_12_in_r <= adc_in;
+								5'd13: if (bemf_sensing) adc_13_in_r <= adc_in;
+								5'd14: if (bemf_sensing) adc_14_in_r <= adc_in;
+								5'd15: if (bemf_sensing) adc_15_in_r <= adc_in;
+								5'd16: adc_16_in_r <= adc_in;
+								default:;
+							endcase
+						end
 						// back to start state
 						auto_adc_state <= 2'b00;
 						

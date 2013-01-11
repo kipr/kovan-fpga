@@ -1,87 +1,149 @@
 `timescale 1ns / 1ps
 
+
+
 module spi(
-	input		SYS_CLK,
-	input		SPI_CLK,
-	input		SSEL,
-	input		MOSI,
-	output	MISO,
-	//input [1039:0] SPI_REG,
-	//output [1039:384] COMMAND_REG
-	//r0 //JS
-	input [7:0] dig_in_val,
-	input [9:0] adc_0_in,
-	input [9:0] adc_1_in,
-	input [9:0] adc_2_in,
-	input [9:0] adc_3_in,
-	input [9:0] adc_4_in,
-	input [9:0] adc_5_in,
-	input [9:0] adc_6_in,
-	input [9:0] adc_7_in,
-	input [9:0] adc_8_in,
-	input [9:0] adc_9_in,
-	input [9:0] adc_10_in,
-	input [9:0] adc_11_in,
-	input [9:0] adc_12_in,
-	input [9:0] adc_13_in,
-	input [9:0] adc_14_in,
-	input [9:0] adc_15_in,
-	input [9:0] adc_16_in,
-	input [0:0] charge_acp_in,
-	input [31:0] bemf_0,
-	input [31:0] bemf_1,
-	input [31:0] bemf_2,
-	input [31:0] bemf_3,
-	input [15:0] servo_pwm0_high,
-	input [15:0] servo_pwm1_high,
-	input [15:0] servo_pwm2_high,
-	input [15:0] servo_pwm3_high,
-	input [7:0] dig_out_val,
-	input [7:0] dig_pu,
-	input [7:0] dig_oe,
-	input [7:0] ana_pu,
-	input [11:0] mot_duty0,
-	input [11:0] mot_duty1,
-	input [11:0] mot_duty2,
-	input [11:0] mot_duty3,
-	//input [0:0] dig_sample,
-	//input [0:0] dig_update,
-	input [7:0] mot_drive_code,
-	input [4:0] mot_allstop,
-	input [0:0] side_button,
-	/*
-	input [15:0] pid_p_goal_0,
-	input [15:0] pid_p_goal_1,
-	input [15:0] pid_p_goal_2,
-	input [15:0] pid_p_goal_3,
-	input [3:0] pid_at_goal,
-*/
-	output reg [15:0] servo_pwm0_high_new,
-	output reg [15:0] servo_pwm1_high_new,
-	output reg [15:0] servo_pwm2_high_new,
-	output reg [15:0] servo_pwm3_high_new,
-	output reg [7:0] dig_out_val_new,
-	output reg [7:0] dig_pu_new,
-	output reg [7:0] dig_oe_new,
-	output reg [7:0] ana_pu_new = 8'hFF,
-	output reg [11:0] mot_duty0_new,
-	output reg [11:0] mot_duty1_new,
-	output reg [11:0] mot_duty2_new,
-	output reg [11:0] mot_duty3_new,
-	//output reg [0:0] dig_sample_new,
-	//output reg [0:0] dig_update_new,
-	output reg [7:0] mot_drive_code_new,
-	output reg [4:0] mot_allstop_new,
-	output reg [3:0] mot_bemf_clear_new
-	/*
-	output reg [15:0] pid_p_goal_0_new,
-	output reg [15:0] pid_p_goal_1_new,
-	output reg [15:0] pid_p_goal_2_new,
-	output reg [15:0] pid_p_goal_3_new
-	*/
-	);
+SYS_CLK, 
+SPI_CLK, 
+SSEL, 
+MOSI, 
+MISO,
+dig_in_val, 
+adc_0_in, 
+adc_1_in,
+adc_2_in,
+adc_3_in,
+adc_4_in,
+adc_5_in,
+adc_6_in,
+adc_7_in,
+adc_8_in,
+adc_9_in,
+adc_10_in,
+adc_11_in,
+adc_12_in,
+adc_13_in,
+adc_14_in,
+adc_15_in,
+adc_16_in,
+charge_acp_in,
+bemf_0,
+bemf_1,
+bemf_2,
+bemf_3,
+servo_pwm0_high,
+servo_pwm1_high,
+servo_pwm2_high,
+servo_pwm3_high,
+dig_out_val,
+dig_pu,
+dig_oe,
+ana_pu,
+mot_duty0,
+mot_duty1,
+mot_duty2,
+mot_duty3,
+mot_drive_code,
+mot_allstop,
+side_button,
 	
+servo_pwm0_high_new,
+servo_pwm1_high_new,
+servo_pwm2_high_new,
+servo_pwm3_high_new,
+dig_out_val_new,
+dig_pu_new,
+dig_oe_new,
+ana_pu_new,
+mot_duty0_new,
+mot_duty1_new,
+mot_duty2_new,
+mot_duty3_new,
+mot_drive_code_new,
+mot_allstop_new,
+mot_bemf_clear_new
+);
+
+
+	// NOTE: Do not change these here
+	// change the *_DEFAULT parameters in kovan.v
+	parameter SERVO_PWM0_HIGH_START = 16'd0;
+	parameter SERVO_PWM1_HIGH_START = 16'd0;
+	parameter SERVO_PWM2_HIGH_START = 16'd0;
+	parameter SERVO_PWM3_HIGH_START = 16'd0;
+	parameter DIG_OUT_VAL_START = 8'd0;
+	parameter DIG_PU_START = 8'd0;
+	parameter DIG_OE_START = 8'd0;
+	parameter ANA_PU_START = 8'h0;
+	parameter MOT_DUTY0_START = 12'd0;
+	parameter MOT_DUTY1_START = 12'd0;
+	parameter MOT_DUTY2_START = 12'd0;
+	parameter MOT_DUTY3_START = 12'd0;
+	parameter MOT_DRIVE_CODE_START = 8'd0;
+	parameter MOT_ALLSTOP_START = 5'd0;
+	parameter MOT_BEMF_CLEAR_START = 4'd0;
+
+	input		SYS_CLK;
+	input		SPI_CLK;
+	input		SSEL;
+	input		MOSI;
+	output	MISO;
+
+	input [7:0] dig_in_val;
+	input [9:0] adc_0_in;
+	input [9:0] adc_1_in;
+	input [9:0] adc_2_in;
+	input [9:0] adc_3_in;
+	input [9:0] adc_4_in;
+	input [9:0] adc_5_in;
+	input [9:0] adc_6_in;
+	input [9:0] adc_7_in;
+	input [9:0] adc_8_in;
+	input [9:0] adc_9_in;
+	input [9:0] adc_10_in;
+	input [9:0] adc_11_in;
+	input [9:0] adc_12_in;
+	input [9:0] adc_13_in;
+	input [9:0] adc_14_in;
+	input [9:0] adc_15_in;
+	input [9:0] adc_16_in;
+	input [0:0] charge_acp_in;
+	input [31:0] bemf_0;
+	input [31:0] bemf_1;
+	input [31:0] bemf_2;
+	input [31:0] bemf_3;
+	input [15:0] servo_pwm0_high;
+	input [15:0] servo_pwm1_high;
+	input [15:0] servo_pwm2_high;
+	input [15:0] servo_pwm3_high;
+	input [7:0] dig_out_val;
+	input [7:0] dig_pu;
+	input [7:0] dig_oe;
+	input [7:0] ana_pu;
+	input [11:0] mot_duty0;
+	input [11:0] mot_duty1;
+	input [11:0] mot_duty2;
+	input [11:0] mot_duty3;
+	input [7:0] mot_drive_code;
+	input [4:0] mot_allstop;
+	input [0:0] side_button;
 	
+
+	output reg [15:0] servo_pwm0_high_new = SERVO_PWM0_HIGH_START;
+	output reg [15:0] servo_pwm1_high_new = SERVO_PWM1_HIGH_START;
+	output reg [15:0] servo_pwm2_high_new = SERVO_PWM2_HIGH_START;
+	output reg [15:0] servo_pwm3_high_new = SERVO_PWM3_HIGH_START;
+	output reg [7:0] dig_out_val_new = DIG_OUT_VAL_START;
+	output reg [7:0] dig_pu_new = DIG_PU_START;
+	output reg [7:0] dig_oe_new = DIG_OE_START;
+	output reg [7:0] ana_pu_new = ANA_PU_START;
+	output reg [11:0] mot_duty0_new = MOT_DUTY0_START;
+	output reg [11:0] mot_duty1_new = MOT_DUTY1_START;
+	output reg [11:0] mot_duty2_new = MOT_DUTY2_START;
+	output reg [11:0] mot_duty3_new = MOT_DUTY3_START;
+	output reg [7:0] mot_drive_code_new = MOT_DRIVE_CODE_START;
+	output reg [4:0] mot_allstop_new = MOT_ALLSTOP_START;
+	output reg [3:0] mot_bemf_clear_new = MOT_BEMF_CLEAR_START;
 
 	
 	

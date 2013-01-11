@@ -29,6 +29,8 @@
   
 `timescale 1 ns / 1 ps
 
+
+
 module kovan (
 
 	input wire INPUT_SW0,
@@ -99,6 +101,26 @@ module kovan (
 
 	input wire       OSC_CLK   // 26 mhz clock from CPU
 	);
+
+
+
+	parameter SERVO_PWM0_HIGH_DEFAULT = 16'd0;
+	parameter SERVO_PWM1_HIGH_DEFAULT  = 16'd0;
+	parameter SERVO_PWM2_HIGH_DEFAULT  = 16'd0;
+	parameter SERVO_PWM3_HIGH_DEFAULT  = 16'd0;
+	parameter DIG_OUT_VAL_DEFAULT  = 8'd0;
+	parameter DIG_PU_DEFAULT  = 8'd0;
+	parameter DIG_OE_DEFAULT  = 8'd0;
+	parameter ANA_PU_DEFAULT  = 8'hFF;
+	parameter MOT_DUTY0_DEFAULT  = 12'd0;
+	parameter MOT_DUTY1_DEFAULT  = 12'd0;
+	parameter MOT_DUTY2_DEFAULT  = 12'd0;
+	parameter MOT_DUTY3_DEFAULT  = 12'd0;
+	parameter MOT_DRIVE_CODE_DEFAULT  = 8'd0;
+	parameter MOT_ALLSTOP_DEFAULT  = 5'd0;
+	parameter MOT_BEMF_CLEAR_DEFAULT  = 4'd0;
+
+
 
    ///////// clock buffers
    wire		clk26;
@@ -628,9 +650,23 @@ module kovan (
     .out_valid(bemf_out_valid)
 	);
 
-	spi pxa_spi (
-
-		// Clocks
+	spi #(
+		.SERVO_PWM0_HIGH_START(SERVO_PWM0_HIGH_DEFAULT),
+		.SERVO_PWM1_HIGH_START(SERVO_PWM1_HIGH_DEFAULT),
+		.SERVO_PWM2_HIGH_START(SERVO_PWM2_HIGH_DEFAULT),
+		.SERVO_PWM3_HIGH_START(SERVO_PWM3_HIGH_DEFAULT),
+		.DIG_OUT_VAL_START(DIG_OUT_VAL_DEFAULT),
+		.DIG_PU_START(DIG_PU_DEFAULT),
+		.DIG_OE_START(DIG_OE_DEFAULT),
+		.ANA_PU_START(ANA_PU_DEFAULT),
+		.MOT_DUTY0_START(MOT_DUTY0_DEFAULT),
+		.MOT_DUTY1_START(MOT_DUTY1_DEFAULT),
+		.MOT_DUTY2_START(MOT_DUTY2_DEFAULT),
+		.MOT_DUTY3_START(MOT_DUTY3_DEFAULT),
+		.MOT_DRIVE_CODE_START(MOT_DRIVE_CODE_DEFAULT),
+		.MOT_ALLSTOP_START(MOT_ALLSTOP_DEFAULT),
+		.MOT_BEMF_CLEAR_START(MOT_BEMF_CLEAR_DEFAULT)		
+	) pxa_spi (	// Clocks
 		.SYS_CLK(clk208M), 
 		.SPI_CLK(FPGA_SCLK), 
 
