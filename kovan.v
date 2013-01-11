@@ -414,7 +414,7 @@ module kovan (
 
 	always @ (posedge clk208M) begin
 	
-		side_button_new <= INPUT_SW0; // TODO: debounce
+		side_button_new <= ~INPUT_SW0; // TODO: debounce
 		side_button_old <= side_button_new;
 		
 		mot_duty0_old <= mot_duty0_new;
