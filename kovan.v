@@ -109,7 +109,7 @@ module kovan (
 	parameter SERVO_PWM2_HIGH_DEFAULT  = 16'd0;
 	parameter SERVO_PWM3_HIGH_DEFAULT  = 16'd0;
 	parameter DIG_OUT_VAL_DEFAULT  = 8'd0;
-	parameter DIG_PU_DEFAULT  = 8'd0;
+	parameter DIG_PU_DEFAULT  = 8'hFF;
 	parameter DIG_OE_DEFAULT  = 8'd0;
 	parameter ANA_PU_DEFAULT  = 8'hFF;
 	parameter MOT_DUTY0_DEFAULT  = 12'd0;

@@ -72,9 +72,9 @@ mot_bemf_clear_new
 	parameter SERVO_PWM2_HIGH_START = 16'd0;
 	parameter SERVO_PWM3_HIGH_START = 16'd0;
 	parameter DIG_OUT_VAL_START = 8'd0;
-	parameter DIG_PU_START = 8'd0;
+	parameter DIG_PU_START = 8'hFF;
 	parameter DIG_OE_START = 8'd0;
-	parameter ANA_PU_START = 8'h0;
+	parameter ANA_PU_START = 8'hFF;
 	parameter MOT_DUTY0_START = 12'd0;
 	parameter MOT_DUTY1_START = 12'd0;
 	parameter MOT_DUTY2_START = 12'd0;
