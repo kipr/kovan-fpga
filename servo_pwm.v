@@ -35,9 +35,9 @@ module servo_pwm(
 
    always @(posedge clk) begin
       if( (!period && !pulse) || (period_cnt > pulse) ) begin
-	 pwm_state <= 1;
+			pwm_state <= 1;
       end else begin
-	 pwm_state <= 0;
+			pwm_state <= 0;
       end
       
       pwm_deglitch <= pwm_state;

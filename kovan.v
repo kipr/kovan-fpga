@@ -104,10 +104,10 @@ module kovan (
 
 
 
-	parameter SERVO_PWM0_HIGH_DEFAULT = 16'd0;
-	parameter SERVO_PWM1_HIGH_DEFAULT  = 16'd0;
-	parameter SERVO_PWM2_HIGH_DEFAULT  = 16'd0;
-	parameter SERVO_PWM3_HIGH_DEFAULT  = 16'd0;
+	parameter SERVO_PWM0_LOW_DEFAULT = 16'd0;
+	parameter SERVO_PWM1_LOW_DEFAULT  = 16'd0;
+	parameter SERVO_PWM2_LOW_DEFAULT  = 16'd0;
+	parameter SERVO_PWM3_LOW_DEFAULT  = 16'd0;
 	parameter DIG_OUT_VAL_DEFAULT  = 8'd0;
 	parameter DIG_PU_DEFAULT  = 8'hFF;
 	parameter DIG_OE_DEFAULT  = 8'd0;
@@ -334,10 +334,10 @@ module kovan (
 	reg [11:0] mot_duty2_old = 12'd0;
 	reg [11:0] mot_duty3_old = 12'd0;
 	
-	reg [23:8] servo_pwm0_old = 16'd0;
-	reg [23:8] servo_pwm1_old = 16'd0;
-	reg [23:8] servo_pwm2_old = 16'd0;
-	reg [23:8] servo_pwm3_old = 16'd0;
+	reg [15:0] servo_pwm0_old = 16'd0;
+	reg [15:0] servo_pwm1_old = 16'd0;
+	reg [15:0] servo_pwm2_old = 16'd0;
+	reg [15:0] servo_pwm3_old = 16'd0;
 	
 	
 	wire [11:0] mot_duty0_new;
@@ -345,10 +345,10 @@ module kovan (
 	wire [11:0] mot_duty2_new;
 	wire [11:0] mot_duty3_new;
 	
-	wire [23:8] servo_pwm0_new;
-	wire [23:8] servo_pwm1_new;
-	wire [23:8] servo_pwm2_new;
-	wire [23:8] servo_pwm3_new;
+	wire [15:0] servo_pwm0_new;
+	wire [15:0] servo_pwm1_new;
+	wire [15:0] servo_pwm2_new;
+	wire [15:0] servo_pwm3_new;
 	
 	reg [7:0] dig_out_val_old = 8'd0;
 	reg [7:0] dig_pu_old = 8'd0;
@@ -374,10 +374,10 @@ module kovan (
 	assign mot_duty2 = mot_duty2_new;
 	assign mot_duty3 = mot_duty3_new;
 
-	assign servo0_pwm_pulse = {servo_pwm0_old, 8'd0};
-	assign servo1_pwm_pulse = {servo_pwm1_old, 8'd0};
-	assign servo2_pwm_pulse = {servo_pwm2_old, 8'd0};
-	assign servo3_pwm_pulse = {servo_pwm3_old, 8'd0};
+	assign servo0_pwm_pulse = {8'd0, servo_pwm0_old};
+	assign servo1_pwm_pulse = {8'd0, servo_pwm1_old};
+	assign servo2_pwm_pulse = {8'd0, servo_pwm2_old};
+	assign servo3_pwm_pulse = {8'd0, servo_pwm3_old};
 
 	
 	// TODO: new or old?
@@ -651,10 +651,10 @@ module kovan (
 	);
 
 	spi #(
-		.SERVO_PWM0_HIGH_START(SERVO_PWM0_HIGH_DEFAULT),
-		.SERVO_PWM1_HIGH_START(SERVO_PWM1_HIGH_DEFAULT),
-		.SERVO_PWM2_HIGH_START(SERVO_PWM2_HIGH_DEFAULT),
-		.SERVO_PWM3_HIGH_START(SERVO_PWM3_HIGH_DEFAULT),
+		.SERVO_PWM0_LOW_START(SERVO_PWM0_LOW_DEFAULT),
+		.SERVO_PWM1_LOW_START(SERVO_PWM1_LOW_DEFAULT),
+		.SERVO_PWM2_LOW_START(SERVO_PWM2_LOW_DEFAULT),
+		.SERVO_PWM3_LOW_START(SERVO_PWM3_LOW_DEFAULT),
 		.DIG_OUT_VAL_START(DIG_OUT_VAL_DEFAULT),
 		.DIG_PU_START(DIG_PU_DEFAULT),
 		.DIG_OE_START(DIG_OE_DEFAULT),
@@ -699,10 +699,10 @@ module kovan (
 	   .bemf_1(bemf_1_r_208M[35:4]),
 		.bemf_2(bemf_2_r_208M[35:4]),
 		.bemf_3(bemf_3_r_208M[35:4]),
-		.servo_pwm0_high(servo_pwm0_old),
-		.servo_pwm1_high(servo_pwm1_old),
-		.servo_pwm2_high(servo_pwm2_old),
-		.servo_pwm3_high(servo_pwm3_old),
+		.servo_pwm0_low(servo_pwm0_old),
+		.servo_pwm1_low(servo_pwm1_old),
+		.servo_pwm2_low(servo_pwm2_old),
+		.servo_pwm3_low(servo_pwm3_old),
 		.dig_out_val(dig_out_val_old),
 		.dig_pu(dig_pu_old),
 		.dig_oe(dig_oe_old),
@@ -717,10 +717,10 @@ module kovan (
 		.mot_allstop(mot_allstop_old),
 		.side_button(side_button_old),
 
-		.servo_pwm0_high_new(servo_pwm0_new),
-		.servo_pwm1_high_new(servo_pwm1_new),
-		.servo_pwm2_high_new(servo_pwm2_new),
-		.servo_pwm3_high_new(servo_pwm3_new),
+		.servo_pwm0_low_new(servo_pwm0_new),
+		.servo_pwm1_low_new(servo_pwm1_new),
+		.servo_pwm2_low_new(servo_pwm2_new),
+		.servo_pwm3_low_new(servo_pwm3_new),
 		.dig_out_val_new(dig_out_val_new),
 		.dig_pu_new(dig_pu_new),
 		.dig_oe_new(dig_oe_new),
