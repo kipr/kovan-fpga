@@ -39,6 +39,9 @@ module kovan (
 	input wire CHG_ACP,           	// reports presence of AC power
 	//output wire CHG_SHDN,         // leave floating
 
+	output wire [5:5]		CAM_D,
+
+
 	// i/o controller digital interfaces
 	input wire        DIG_ADC_OUT,
 	output wire [1:0] DIG_ADC_CS,
@@ -120,7 +123,8 @@ module kovan (
 	parameter MOT_ALLSTOP_DEFAULT  = 5'd0;
 	parameter MOT_BEMF_CLEAR_DEFAULT  = 4'd0;
 
-
+	/* Wires USB_OTG_TYPE to be a device */
+	assign CAM_D[5] = 1'b1;
 
    ///////// clock buffers
    wire		clk26;

@@ -13,6 +13,8 @@ CONFIG VCCAUX  = 3.3;
 NET "OSC_CLK" TNM_NET = "TNM_clk26";
 TIMESPEC "TS_clk26" = PERIOD "TNM_clk26" 26 MHz HIGH 50;
 
+NET "CAM_D[5]" LOC = C4;
+NET "CAM_D[5]" IOSTANDARD = LVCMOS33;
 
 ###### power subsystem
 ## charger status pins
