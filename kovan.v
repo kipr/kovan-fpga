@@ -41,6 +41,22 @@ module kovan (
 
 	output wire [5:5]		CAM_D,
 
+	// HDMI
+	input wire        CEC,
+	input  wire       DDC_SDA_LV_N,
+	output wire       DDC_SDA_PU,
+	output wire       DDC_SDA_PD,
+	input  wire       DDC_SCL_LV_N,
+	input  wire       HPD_N,
+	output wire       HPD_NOTIFY,
+	output wire       HPD_OVERRIDE,
+	output wire       VSYNC_STB,
+
+	// HDMI high speed phy lines
+	input wire [3:0]  RX0_TMDS_P,
+	input wire [3:0]  RX0_TMDS_N,
+	output wire [3:0] TX0_TMDS_P,
+	output wire [3:0] TX0_TMDS_N,
 
 	// i/o controller digital interfaces
 	input wire        DIG_ADC_OUT,
@@ -104,8 +120,6 @@ module kovan (
 
 	input wire       OSC_CLK   // 26 mhz clock from CPU
 	);
-
-
 
 	parameter SERVO_PWM0_LOW_DEFAULT = 16'd0;
 	parameter SERVO_PWM1_LOW_DEFAULT  = 16'd0;
@@ -415,6 +429,48 @@ module kovan (
 	
 	wire [3:0] mot_bemf_clear_new;
 	reg [3:0] mot_bemf_clear_old = 4'd0;	
+
+
+
+////////////////// HDMI
+   hdmi hdmi_module(
+		    .qvgaclk(clk_qvga),
+		    .lcd_red(lcd_pipe_r),
+		    .lcd_green(lcd_pipe_g),
+		    .lcd_blue(lcd_pipe_b),
+		    .lcd_den(!lcd_pipe_den),
+		    .lcd_hsync(!lcd_pipe_hsync),
+		    .lcd_vsync(!lcd_pipe_vsync),
+
+		    .TMDS(TX0_TMDS_P),
+		    .TMDSB(TX0_TMDS_N),
+
+		    .dbg_hsync(dbg_hsync),
+		    .dbg_vsync(dbg_vsync),
+		    .dbg_de(dbg_de),
+		    
+		    .rstin(lcd_reset)
+		    );
+   
+   // dummy tie-downs to make UCF constraints happy when there is no HDMI interface
+   wire [3:0] dummy_tmds;
+   
+   IBUFDS  #(.IOSTANDARD("TMDS_33"), .DIFF_TERM("FALSE") 
+	     ) ibuf_dummy0 (.I(RX0_TMDS_P[0]), .IB(RX0_TMDS_N[0]), .O(dummy_tmds[0]));
+   IBUFDS  #(.IOSTANDARD("TMDS_33"), .DIFF_TERM("FALSE") 
+	     ) ibuf_dummy1 (.I(RX0_TMDS_P[1]), .IB(RX0_TMDS_N[1]), .O(dummy_tmds[1]));
+   IBUFDS  #(.IOSTANDARD("TMDS_33"), .DIFF_TERM("FALSE") 
+	     ) ibuf_dummy2 (.I(RX0_TMDS_P[2]), .IB(RX0_TMDS_N[2]), .O(dummy_tmds[2]));
+   IBUFDS  #(.IOSTANDARD("TMDS_33"), .DIFF_TERM("FALSE") 
+	     ) ibuf_dummy3 (.I(RX0_TMDS_P[3]), .IB(RX0_TMDS_N[3]), .O(dummy_tmds[3]));
+
+   assign DDC_SDA_PU = 1'b0;
+   assign DDC_SDA_PD = 1'b0;
+   
+   assign VSYNC_STB = 1'b0;
+   assign HPD_OVERRIDE = 1'b0;
+////////////////// HDMI
+
 
 	always @ (posedge clk208M) begin
 	

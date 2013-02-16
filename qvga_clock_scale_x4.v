@@ -1,4 +1,4 @@
-// file: clk_wiz_v3_2_qvga.v
+// file: qvga_clock_scale_x4.v
 // 
 // (c) Copyright 2008 - 2011 Xilinx, Inc. All rights reserved.
 // 
@@ -49,33 +49,27 @@
 //----------------------------------------------------------------------------
 // User entered comments
 //----------------------------------------------------------------------------
-// GenerateQVGAclock
+// None
 //
 //----------------------------------------------------------------------------
 // "Output    Output      Phase     Duty      Pk-to-Pk        Phase"
 // "Clock    Freq (MHz) (degrees) Cycle (%) Jitter (ps)  Error (ps)"
 //----------------------------------------------------------------------------
-// CLK_OUT1_____6.400______0.000______50.0______588.237____276.415
-// CLK_OUT2____13.000______0.000______50.0______508.589____276.415
-// CLK_OUT3_____3.250______0.000______50.0______670.790____276.415
-// CLK_OUT4___208.003______0.000______50.0______272.360____276.415
+// CLK_OUT1____25.200______0.000______50.0______768.939____150.000
 //
 //----------------------------------------------------------------------------
 // "Input Clock   Freq (MHz)    Input Jitter (UI)"
 //----------------------------------------------------------------------------
-// __primary______________26____________0.010
+// __primary_____________6.3____________0.010
 
 `timescale 1ps/1ps
 
-(* CORE_GENERATION_INFO = "clk_wiz_v3_2_qvga,clk_wiz_v3_2,{component_name=clk_wiz_v3_2_qvga,use_phase_alignment=true,use_min_o_jitter=false,use_max_i_jitter=false,use_dyn_phase_shift=false,use_inclk_switchover=false,use_dyn_reconfig=false,feedback_source=FDBK_AUTO,primtype_sel=PLL_BASE,num_out_clk=4,clkin1_period=38.461,clkin2_period=38.461,use_power_down=false,use_reset=true,use_locked=true,use_inclk_stopped=false,use_status=false,use_freeze=false,use_clk_valid=false,feedback_type=SINGLE,clock_mgr_type=AUTO,manual_override=false}" *)
-module clk_wiz_v3_2_qvga
+(* CORE_GENERATION_INFO = "qvga_clock_scale_x4,clk_wiz_v3_2,{component_name=qvga_clock_scale_x4,use_phase_alignment=true,use_min_o_jitter=false,use_max_i_jitter=false,use_dyn_phase_shift=false,use_inclk_switchover=false,use_dyn_reconfig=false,feedback_source=FDBK_AUTO,primtype_sel=DCM_SP,num_out_clk=1,clkin1_period=158.73015873,clkin2_period=158.73015873,use_power_down=false,use_reset=true,use_locked=true,use_inclk_stopped=false,use_status=false,use_freeze=false,use_clk_valid=false,feedback_type=SINGLE,clock_mgr_type=MANUAL,manual_override=false}" *)
+module qvga_clock_scale_x4
  (// Clock in ports
-  input         CLK_IN1,
+  input         clk6p3,
   // Clock out ports
-  output        clk_out6p4,
-  output        clk_out13,
-  output        clk_out3p25,
-  output        clk_out208,
+  output        clk25p2,
   // Status and control signals
   input         RESET,
   output        LOCKED
@@ -83,81 +77,72 @@ module clk_wiz_v3_2_qvga
 
   // Input buffering
   //------------------------------------
-  assign clkin1 = CLK_IN1;
+  assign clkin1 = clk6p3;
 
 
   // Clocking primitive
   //------------------------------------
-  // Instantiation of the PLL primitive
+
+  // Instantiation of the DCM primitive
   //    * Unused inputs are tied off
   //    * Unused outputs are labeled unused
-  wire [15:0] do_unused;
-  wire        drdy_unused;
-  wire        clkfbout;
-  wire        clkfbout_buf;
-  wire        clkout4_unused;
-  wire        clkout5_unused;
+  wire        psdone_unused;
+  wire        locked_int;
+  wire [7:0]  status_int;
+  wire clkfb;
+  wire clk0;
+  wire clkfx;
 
-  PLL_BASE
-  #(.BANDWIDTH              ("OPTIMIZED"),
-    .CLK_FEEDBACK           ("CLKFBOUT"),
-    .COMPENSATION           ("SYSTEM_SYNCHRONOUS"),
-    .DIVCLK_DIVIDE          (1),
-    .CLKFBOUT_MULT          (16),
-    .CLKFBOUT_PHASE         (0.000),
-    .CLKOUT0_DIVIDE         (65),
-    .CLKOUT0_PHASE          (0.000),
-    .CLKOUT0_DUTY_CYCLE     (0.500),
-    .CLKOUT1_DIVIDE         (32),
-    .CLKOUT1_PHASE          (0.000),
-    .CLKOUT1_DUTY_CYCLE     (0.500),
-    .CLKOUT2_DIVIDE         (128),
-    .CLKOUT2_PHASE          (0.000),
-    .CLKOUT2_DUTY_CYCLE     (0.500),
-    .CLKOUT3_DIVIDE         (2),
-    .CLKOUT3_PHASE          (0.000),
-    .CLKOUT3_DUTY_CYCLE     (0.500),
-    .CLKIN_PERIOD           (38.461),
-    .REF_JITTER             (0.010))
-  pll_base_inst
+  DCM_SP
+  #(.CLKDV_DIVIDE          (2.000),
+    .CLKFX_DIVIDE          (1),
+    .CLKFX_MULTIPLY        (4),
+    .CLKIN_DIVIDE_BY_2     ("FALSE"),
+    .CLKIN_PERIOD          (158.73015873),
+    .CLKOUT_PHASE_SHIFT    ("NONE"),
+    .CLK_FEEDBACK          ("1X"),
+    .DESKEW_ADJUST         ("SYSTEM_SYNCHRONOUS"),
+    .PHASE_SHIFT           (0),
+    .STARTUP_WAIT          ("FALSE"))
+  dcm_sp_inst
+    // Input clock
+   (.CLKIN                 (clkin1),
+    .CLKFB                 (clkfb),
     // Output clocks
-   (.CLKFBOUT              (clkfbout),
-    .CLKOUT0               (clkout0),
-    .CLKOUT1               (clkout1),
-    .CLKOUT2               (clkout2),
-    .CLKOUT3               (clkout3),
-    .CLKOUT4               (clkout4_unused),
-    .CLKOUT5               (clkout5_unused),
-    // Status and control signals
-    .LOCKED                (LOCKED),
+    .CLK0                  (clk0),
+    .CLK90                 (),
+    .CLK180                (),
+    .CLK270                (),
+    .CLK2X                 (),
+    .CLK2X180              (),
+    .CLKFX                 (clkfx),
+    .CLKFX180              (),
+    .CLKDV                 (),
+    // Ports for dynamic phase shift
+    .PSCLK                 (1'b0),
+    .PSEN                  (1'b0),
+    .PSINCDEC              (1'b0),
+    .PSDONE                (),
+    // Other control and status signals
+    .LOCKED                (locked_int),
+    .STATUS                (status_int),
+ 
     .RST                   (RESET),
-     // Input clock control
-    .CLKFBIN               (clkfbout_buf),
-    .CLKIN                 (clkin1));
+    // Unused pin- tie low
+    .DSSEN                 (1'b0));
 
+    assign LOCKED = locked_int;
 
   // Output buffering
   //-----------------------------------
   BUFG clkf_buf
-   (.O (clkfbout_buf),
-    .I (clkfbout));
+   (.O (clkfb),
+    .I (clk0));
 
   BUFG clkout1_buf
-   (.O   (clk_out6p4),
-    .I   (clkout0));
+   (.O   (clk25p2),
+    .I   (clkfx));
 
-
-  BUFG clkout2_buf
-   (.O   (clk_out13),
-    .I   (clkout1));
-
-  BUFG clkout3_buf
-   (.O   (clk_out3p25),
-    .I   (clkout2));
-
-  BUFG clkout4_buf
-   (.O   (clk_out208),
-    .I   (clkout3));
 
 
 
